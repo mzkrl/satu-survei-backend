@@ -11,8 +11,10 @@ from rest_framework.permissions import AllowAny, IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
 
 from apps.api.serializers import SurveyListSerializer, build_detail_payload
+from apps.api.throttling import UploadRateThrottle
 from apps.pipeline.orchestrator import run_pipeline
 from apps.surveys.forms import SurveyUploadForm
+from apps.surveys.messages import friendly_status_message
 from apps.surveys.models import Survey
 from apps.surveys.services import create_or_get_survey
 
@@ -46,9 +48,20 @@ def _form_errors(form: SurveyUploadForm) -> dict[str, list[str]]:
     }
 
 
+def _form_stage(form: SurveyUploadForm) -> str:
+    if set(form.errors).intersection({"file"}):
+        return "file"
+    return "metadata"
+
+
 class SurveyListCreateView(ListCreateAPIView):
     permission_classes = [IsAuthenticatedOrReadOnly]
     serializer_class = SurveyListSerializer
+
+    def get_throttles(self):
+        if self.request.method == "POST":
+            return [UploadRateThrottle()]
+        return []
 
     def get_queryset(self):
         return _completed_public_queryset()
@@ -56,8 +69,19 @@ class SurveyListCreateView(ListCreateAPIView):
     def create(self, request, *args, **kwargs):
         form = SurveyUploadForm(request.POST, request.FILES)
         if not form.is_valid():
+            stage = _form_stage(form)
+            error_status = (
+                Survey.Status.REJECTED_FILE
+                if stage == "file"
+                else Survey.Status.REJECTED_METADATA
+            )
             return Response(
-                {"stage": "metadata", "reason": _form_errors(form), "attempts": 0},
+                {
+                    "stage": stage,
+                    "reason": _form_errors(form),
+                    "attempts": 0,
+                    "status_message": friendly_status_message(error_status),
+                },
                 status=status.HTTP_400_BAD_REQUEST,
             )
         survey, created = create_or_get_survey(
@@ -74,6 +98,7 @@ class SurveyListCreateView(ListCreateAPIView):
                     "stage": survey.error_stage or survey.status,
                     "reason": survey.error_reason,
                     "attempts": survey.attempts.count(),
+                    "status_message": friendly_status_message(survey.status),
                 },
                 status=status.HTTP_400_BAD_REQUEST,
             )

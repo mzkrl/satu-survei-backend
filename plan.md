@@ -417,11 +417,11 @@ Halaman (Django templates + Tailwind CDN):
 **DoD:** instalasi baru + `seed_demo` → landing page terisi tanpa API key.
 
 ### M11 — Hardening (P1)
-- [ ] Timeout sinkron: `gunicorn --timeout 180`; cek batas proxy hosting
-- [ ] Pesan error ramah untuk setiap status
-- [ ] Rate limit sederhana pada `POST` (mis. throttle DRF)
-- [ ] Pengujian prompt-injection: PDF yang berisi teks *"abaikan instruksi sebelumnya…"* tidak mengubah perilaku
-- [ ] Tes keamanan file: nama file aneh, PDF korup
+- [x] Timeout sinkron: `gunicorn --timeout 180`; cek batas proxy hosting
+- [x] Pesan error ramah untuk setiap status
+- [x] Rate limit sederhana pada `POST` (mis. throttle DRF)
+- [x] Pengujian prompt-injection: PDF yang berisi teks *"abaikan instruksi sebelumnya…"* tidak mengubah perilaku
+- [x] Tes keamanan file: nama file aneh, PDF korup
 
 ### M12 — Deploy & latihan demo (P0)
 - [ ] Deploy (Render/Railway/Fly/VPS) dengan Postgres, `collectstatic`, env produksi, `DEBUG=0`
@@ -535,6 +535,11 @@ Halaman (Django templates + Tailwind CDN):
 - M10: demo memakai 6 PDF **sintetis** dengan institusi fiktif (label "Data sintetis" ada di `notes` tiap PDF & tampil di kartu) — menghindari salah menampilkan data institusi nyata.
 - M10: `seed_demo` menyalakan `DEMO_MODE` via `override_settings` sehingga instalasi baru cukup `manage.py seed_demo` tanpa API key; flag `--generate-cache` (butuh API key) untuk membangun cache sekali. Idempoten: survey `completed` dilewati, `processing` (sisa interupsi) diproses ulang.
 - M10 (koreksi manual terdokumentasi): LLM melewatkan kalimat "Redaksi pertanyaan…" di 3 PDF (kepuasan/ekonomi/pangan) → field `question_wording_disclosed` dikoreksi di cache jadi `found` (nilai boolean `true`, sumber halaman 1 sesuai teks PDF); catatan manifest ekonomi diperbarui 7/9→8/9. Hasil akhir: R2 9/9, 8/9, 5/9, 4/9 (fail), 5/9, 9/9; R1 pass×3, fail (MoE 1,8% vs hitungan 3,1%), warn (kuota/panel online), na.
+- M11: throttle memakai kelas sendiri (`UploadRateThrottle`) yang membaca `settings.THROTTLE_UPLOAD_RATE` per request (default `10/min`) — menghindari reload `api_settings` DRF yang tidak andal di test; cache LocMem per proses (multi-proses gunicorn → batas efektif ×jumlah worker; cukup untuk MVP).
+- M11: throttle hanya untuk `POST /api/surveys/`; daftar/detail/CSV publik tidak dibatasi.
+- M11: error form dipetakan ke `stage` — masalah di field `file` → `stage=file` + pesan `REJECTED_FILE`, selain itu `stage=metadata`; respons API membawa `status_message` ramah untuk tiap status (8 status, bahasa netral).
+- M11: gunicorn tidak bisa diuji di Windows (Unix-only) — dokumentasi perintah di `CLAUDE.md` untuk produksi; `requirements.txt` sudah menyertakan gunicorn dari M0.
+- M11 (temuan): `SuspiciousFileOperation`/sanitasi nama berkas ditangani Django (`UploadedFile._set_name` + `upload_to`); test memverifikasi `..`, backslash, dan komponen asing tidak bocor ke nama tersimpan.
 
 ---
 

@@ -107,6 +107,15 @@ REST_FRAMEWORK = {
     "PAGE_SIZE": 20,
 }
 
+THROTTLE_UPLOAD_RATE = env_str("THROTTLE_UPLOAD_RATE", "10/min")
+
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+        "LOCATION": "satusurvey",
+    }
+}
+
 CORS_ALLOW_ALL_ORIGINS = env_bool("CORS_ALLOW_ALL_ORIGINS", True)
 
 LLM_PROVIDER = env_str("LLM_PROVIDER", "fake")

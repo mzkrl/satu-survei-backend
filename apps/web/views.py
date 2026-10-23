@@ -10,6 +10,7 @@ from django.views.generic import TemplateView
 
 from apps.pipeline.orchestrator import run_pipeline
 from apps.surveys.forms import SurveyUploadForm
+from apps.surveys.messages import friendly_status_message
 from apps.surveys.models import Survey
 from apps.surveys.services import create_or_get_survey
 
@@ -80,8 +81,9 @@ class UploadView(LoginRequiredMixin, View):
             return redirect("web:survey_detail", pk=survey.pk)
         messages.error(
             request,
-            f"Analisis berhenti di tahap {survey.error_stage or survey.status}: "
-            f"{survey.error_reason}",
+            f"Analisis berhenti di tahap {survey.error_stage or survey.status}. "
+            f"{friendly_status_message(survey.status)} "
+            f"Detail: {survey.error_reason}",
         )
         return render(
             request,
