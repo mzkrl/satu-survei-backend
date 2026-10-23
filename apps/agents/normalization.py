@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import time
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -62,6 +63,7 @@ def normalize_with_retries(
     max_attempts: int = 3,
     timeout_s: int = 90,
     grounding_min_ratio: float = 0.6,
+    deadline: float | None = None,
 ) -> NormalizationOutcome:
     system = load_system_prompt()
     base_user = build_user_prompt(document_text)
@@ -71,6 +73,8 @@ def normalize_with_retries(
     last_errors: list[str] = []
 
     for attempt_no in range(1, max_attempts + 1):
+        if deadline is not None and time.monotonic() > deadline:
+            raise TimeoutError("Batas waktu pipeline terlampaui.")
         response = client.complete(system=system, user=user, timeout_s=timeout_s)
         result = run_normalization_qc(
             response.text,

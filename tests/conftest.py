@@ -71,11 +71,54 @@ def make_normalization_json(**kwargs) -> str:
     return json.dumps(make_normalization_output(**kwargs))
 
 
+def make_analysis_output(**overrides) -> dict:
+    output = {
+        "summary": "Survei melaporkan kepuasan kinerja pemerintah 72,4% dengan margin of error 2,9 poin.",
+        "findings": [
+            {
+                "text": "Kepuasan kinerja pemerintah berada di 72,4%.",
+                "evidence_ids": ["E1"],
+                "rule_ids": [],
+            }
+        ],
+        "caveats": [
+            {
+                "text": "Tanggal pelaksanaan lapangan tidak ditemukan di dokumen.",
+                "evidence_ids": [],
+                "rule_ids": ["R2"],
+            }
+        ],
+        "visualizations": [
+            {
+                "id": "V1",
+                "type": "metric_bar",
+                "title": "Kepuasan kinerja pemerintah",
+                "unit": "%",
+                "data": [{"label": "Kepuasan", "value": 72.4, "evidence_id": "E1"}],
+            }
+        ],
+    }
+    output.update(overrides)
+    return output
+
+
+def make_analysis_json(**overrides) -> str:
+    return json.dumps(make_analysis_output(**overrides))
+
+
 def make_pdf_bytes(pages: int = 1, text: str = "Laporan survei contoh.") -> bytes:
+    import textwrap
+
     doc = pymupdf.open()
+    lines: list[str] = []
+    for paragraph in text.split("\n"):
+        lines.extend(textwrap.wrap(paragraph, width=90) or [""])
     for _ in range(pages):
         page = doc.new_page()
-        page.insert_text((72, 72), text)
+        y = 72
+        for line in lines:
+            page.insert_text((72, y), line)
+            y += 14
     data = doc.tobytes()
     doc.close()
     return data

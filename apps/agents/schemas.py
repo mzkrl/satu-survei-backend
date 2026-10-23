@@ -114,3 +114,47 @@ class NormalizationOutput(BaseModel):
         if duplicates:
             raise ValueError(f"id bukti duplikat: {', '.join(duplicates)}")
         return self
+
+
+class ReferenceBlock(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    text: str = Field(min_length=1)
+    evidence_ids: list[str] = Field(default_factory=list)
+    rule_ids: list[str] = Field(default_factory=list)
+
+
+class MetricBarPoint(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    label: str = Field(min_length=1)
+    value: float
+    evidence_id: str = Field(pattern=r"^E\d+$")
+
+
+class Visualization(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    id: str = Field(pattern=r"^V\d+$")
+    type: Literal["metric_bar", "metric_table"]
+    title: str = Field(min_length=1)
+    unit: str = ""
+    data: list[MetricBarPoint] = Field(default_factory=list)
+    evidence_ids: list[str] = Field(default_factory=list)
+
+    @model_validator(mode="after")
+    def _validate_shape(self) -> "Visualization":
+        if self.type == "metric_bar" and not self.data:
+            raise ValueError("metric_bar memerlukan data (minimal satu titik)")
+        if self.type == "metric_table" and not self.evidence_ids:
+            raise ValueError("metric_table memerlukan evidence_ids")
+        return self
+
+
+class AnalysisOutput(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    summary: str = Field(min_length=1)
+    findings: list[ReferenceBlock] = Field(min_length=1, max_length=8)
+    caveats: list[ReferenceBlock] = Field(default_factory=list)
+    visualizations: list[Visualization] = Field(default_factory=list, max_length=4)

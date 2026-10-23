@@ -369,12 +369,12 @@ def run_pipeline(survey_id: int) -> Survey: ...
 **DoD:** fungsi murni, tanpa akses DB di `moe.py`/`disclosure.py`.
 
 ### M6 — Analysis Agent + QC (P0)
-- [ ] Skema 7.2, prompt v1, `analysis.py`, QC referensi + kesamaan nilai
-- [ ] Test: ID evidence tidak ada → error; tipe chart tak didukung → error; nilai chart ≠ evidence → error; retry sukses
+- [x] Skema 7.2, prompt v1, `analysis.py`, QC referensi + kesamaan nilai
+- [x] Test: ID evidence tidak ada → error; tipe chart tak didukung → error; nilai chart ≠ evidence → error; retry sukses
 
 ### M7 — Orchestrator end-to-end (P0)
-- [ ] `run_pipeline`, status, `PipelineAttempt`, batas waktu, demo cache
-- [ ] Test integrasi dengan Fake: happy path, retry, tiap jenis kegagalan, `failed_system`
+- [x] `run_pipeline`, status, `PipelineAttempt`, batas waktu, demo cache
+- [x] Test integrasi dengan Fake: happy path, retry, tiap jenis kegagalan, `failed_system`
 
 **DoD:** satu PDF contoh → `completed` dengan evidence + rule + analisis tersimpan.
 
@@ -518,6 +518,12 @@ Halaman (Django templates + Tailwind CDN):
 - M5: confidence_level_pct hilang → diasumsikan 95% (z=1.96) dengan catatan di `details.asumsi`; confidence selain 90/95/99 dihitung via `scipy.stats.norm.ppf`.
 - M5: kata kunci non-probabilitas: quota, kuota, online panel, convenience, snowball.
 - M5: `ANTHROPIC_BASE_URL` ditambahkan dari env (opsional) — disiapkan untuk router eksternal (9router) tanpa mengubah kode.
+- M6: `metric_table` wajib punya `evidence_ids`; `metric_bar` wajib punya `data` — plan tidak menyebut eksplisit, dipilih agar frontend selalu punya acuan.
+- M6: aturan "caveats ≥ 1 bila ada rule warn/fail/na" dicek QC terhadap hasil rule yang nyata (input), bukan yang diklaim LLM.
+- M7: total budget pipeline (`PIPELINE_TOTAL_BUDGET_S`, default 240) dibuat env-tunable — model router bisa >240 dtk per panggilan; smoke lokal memakai 900.
+- M7: `deadline` dicek sebelum tiap panggilan LLM di loop retry (agents), TimeoutError → `failed_system`.
+- M7: cache demo menyimpan hanya output LLM (normalization + analysis + grounding); rule engine dijalankan ulang dari cache (deterministik).
+- M7 (verifikasi nyata): 9router (`ANTHROPIC_BASE_URL`) berbicara protokol Anthropic-style `/messages`; model aktif `bzl/deepseek-v4-flash-0731free`; pipeline end-to-end dengan LLM asli → `completed` (norm 1x±115 dtk, analisis 1x±27 dtk, 3 evidence grounded, R1 pass, R2 5/9 warn). Model combo (`cerdas`) timeout; beberapa model upstream 402/429/410.
 
 ---
 
