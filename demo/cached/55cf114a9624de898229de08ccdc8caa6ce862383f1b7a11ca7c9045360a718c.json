@@ -1,0 +1,330 @@
+{
+  "schema_version": "1.0",
+  "llm_model": "deepseek-v4-flash-0731free",
+  "prompt_version": "analysis_v1",
+  "normalization": {
+    "survey_profile": {
+      "sample_size": {
+        "status": "found",
+        "value": 2000.0,
+        "source": {
+          "page": 1,
+          "excerpt": "Survei ini menggunakan metode two-stage cluster sampling. Sampel\nsebanyak 2.000 rumah tangga dipilih secara acak dari 15 provinsi."
+        }
+      },
+      "sampling_method": {
+        "status": "found",
+        "value": "two-stage cluster sampling",
+        "source": {
+          "page": 1,
+          "excerpt": "Survei ini menggunakan metode two-stage cluster sampling."
+        }
+      },
+      "moe_claimed_pct": {
+        "status": "found",
+        "value": 2.9,
+        "source": {
+          "page": 1,
+          "excerpt": "Tingkat kepercayaan survei ini adalah\n99 persen dengan margin of error sebesar 2,9 persen."
+        }
+      },
+      "confidence_level_pct": {
+        "status": "found",
+        "value": 99.0,
+        "source": {
+          "page": 1,
+          "excerpt": "Tingkat kepercayaan survei ini adalah\n99 persen dengan margin of error sebesar 2,9 persen."
+        }
+      },
+      "fieldwork_start": {
+        "status": "found",
+        "value": "3 Juni 2026",
+        "source": {
+          "page": 1,
+          "excerpt": "Wawancara dilaksanakan pada 3 Juni 2026 hingga 27 Juni 2026."
+        }
+      },
+      "fieldwork_end": {
+        "status": "found",
+        "value": "27 Juni 2026",
+        "source": {
+          "page": 1,
+          "excerpt": "Wawancara dilaksanakan pada 3 Juni 2026 hingga 27 Juni 2026."
+        }
+      },
+      "sponsor_or_funder": {
+        "status": "found",
+        "value": "konsorsium riset pangan",
+        "source": {
+          "page": 1,
+          "excerpt": "Pendana survei berasal dari konsorsium riset pangan."
+        }
+      },
+      "conducted_by": {
+        "status": "found",
+        "value": "Lembaga Studi Pangan Contoh",
+        "source": {
+          "page": 1,
+          "excerpt": "Laporan ini menyajikan hasil Survei Ketahanan Pangan Rumah Tangga\n2026 yang diselenggarakan oleh Lembaga Studi Pangan Contoh."
+        }
+      },
+      "population": {
+        "status": "found",
+        "value": "rumah tangga dengan minimal satu anggota berusia 18 tahun ke atas",
+        "source": {
+          "page": 1,
+          "excerpt": "Populasi survei adalah rumah tangga dengan minimal satu anggota\nberusia 18 tahun ke atas."
+        }
+      },
+      "geography": {
+        "status": "found",
+        "value": "15 provinsi",
+        "source": {
+          "page": 1,
+          "excerpt": "Sampel\nsebanyak 2.000 rumah tangga dipilih secara acak dari 15 provinsi."
+        }
+      },
+      "mode": {
+        "status": "found",
+        "value": "tatap muka",
+        "source": {
+          "page": 1,
+          "excerpt": "Survei dilakukan secara tatap muka oleh enumerator terlatih."
+        }
+      },
+      "weighting": {
+        "status": "found",
+        "value": "mengikuti proporsi rumah tangga nasional dari sensus terakhir",
+        "source": {
+          "page": 1,
+          "excerpt": "Pembobotan\nmengikuti proporsi rumah tangga nasional dari sensus terakhir."
+        }
+      },
+      "question_wording_disclosed": {
+        "status": "found",
+        "value": true,
+        "source": {
+          "page": 1,
+          "excerpt": "Redaksi pertanyaan telah melalui uji reliabilitas dan disetujui komite etik."
+        }
+      }
+    },
+    "evidence_records": [
+      {
+        "id": "E1",
+        "label_original": "Ketahanan pangan keluarga dalam kondisi baik",
+        "label_normalized": "Rumah tangga dengan ketahanan pangan keluarga dalam kondisi baik",
+        "value": 45.8,
+        "value_raw": "45,8 persen",
+        "unit": "%",
+        "period": "Juni 2026",
+        "geography": "15 provinsi",
+        "definition": null,
+        "source": {
+          "page": 1,
+          "excerpt": "Temuan utama menunjukkan 45,8 persen rumah tangga menyatakan\nketahanan pangan keluarga dalam kondisi baik."
+        },
+        "unknown_fields": [
+          "definition"
+        ]
+      },
+      {
+        "id": "E2",
+        "label_original": "Konsumsi pangan bergizi (protein hewani minimal sekali sehari)",
+        "label_normalized": "Rumah tangga dengan konsumsi pangan bergizi (protein hewani minimal sekali sehari)",
+        "value": 57.3,
+        "value_raw": "57,3 persen",
+        "unit": "%",
+        "period": "Juni 2026",
+        "geography": "15 provinsi",
+        "definition": "protein hewani minimal sekali sehari",
+        "source": {
+          "page": 1,
+          "excerpt": "Konsumsi pangan\nbergizi (protein hewani minimal sekali sehari) tercatat 57,3\npersen rumah tangga."
+        },
+        "unknown_fields": []
+      },
+      {
+        "id": "E3",
+        "label_original": "Kecukupan cadangan pangan rumah tangga selama satu minggu",
+        "label_normalized": "Rumah tangga dengan kecukupan cadangan pangan selama satu minggu",
+        "value": 62.1,
+        "value_raw": "62,1 persen",
+        "unit": "%",
+        "period": "Juni 2026",
+        "geography": "15 provinsi",
+        "definition": null,
+        "source": {
+          "page": 1,
+          "excerpt": "Kecukupan cadangan pangan rumah tangga\nselama satu minggu mencapai 62,1 persen."
+        },
+        "unknown_fields": [
+          "definition"
+        ]
+      },
+      {
+        "id": "E4",
+        "label_original": "Kerawanan pangan musiman",
+        "label_normalized": "Rumah tangga yang mengalami kerawanan pangan musiman",
+        "value": 19.6,
+        "value_raw": "19,6 persen",
+        "unit": "%",
+        "period": "Juni 2026",
+        "geography": "15 provinsi",
+        "definition": null,
+        "source": {
+          "page": 1,
+          "excerpt": "Kerawanan pangan\nmusiman dilaporkan 19,6 persen rumah tangga."
+        },
+        "unknown_fields": [
+          "definition"
+        ]
+      },
+      {
+        "id": "E5",
+        "label_original": "Kepuasan terhadap akses pasar pangan terdekat",
+        "label_normalized": "Rumah tangga yang puas terhadap akses pasar pangan terdekat",
+        "value": 68.4,
+        "value_raw": "68,4 persen",
+        "unit": "%",
+        "period": "Juni 2026",
+        "geography": "15 provinsi",
+        "definition": null,
+        "source": {
+          "page": 1,
+          "excerpt": "Kepuasan terhadap\nakses pasar pangan terdekat sebesar 68,4 persen."
+        },
+        "unknown_fields": [
+          "definition"
+        ]
+      }
+    ]
+  },
+  "grounding": {
+    "E1": true,
+    "E2": true,
+    "E3": true,
+    "E4": true,
+    "E5": true
+  },
+  "analysis": {
+    "summary": "Survei Ketahanan Pangan Rumah Tangga 2026 oleh Lembaga Studi Pangan Contoh mencatat lima indikator periode Juni 2026. Nilai tertinggi pada kepuasan akses pasar pangan terdekat (68,4%) dan terendah pada kerawanan pangan musiman (19,6%). Klaim MoE 2,9% lolos verifikasi dengan asumsi sampel acak sederhana (R1); kelengkapan disclosure 8/9, redaksi pertanyaan tidak ditemukan (R2).",
+    "findings": [
+      {
+        "text": "Ketahanan pangan keluarga dalam kondisi baik tercatat 45,8% pada Juni 2026.",
+        "evidence_ids": [
+          "E1"
+        ],
+        "rule_ids": []
+      },
+      {
+        "text": "Konsumsi pangan bergizi (protein hewani minimal sekali sehari) tercatat 57,3%.",
+        "evidence_ids": [
+          "E2"
+        ],
+        "rule_ids": []
+      },
+      {
+        "text": "Kecukupan cadangan pangan rumah tangga selama satu minggu tercatat 62,1%.",
+        "evidence_ids": [
+          "E3"
+        ],
+        "rule_ids": []
+      },
+      {
+        "text": "Kerawanan pangan musiman tercatat 19,6%.",
+        "evidence_ids": [
+          "E4"
+        ],
+        "rule_ids": []
+      },
+      {
+        "text": "Kepuasan terhadap akses pasar pangan terdekat tercatat 68,4%.",
+        "evidence_ids": [
+          "E5"
+        ],
+        "rule_ids": []
+      },
+      {
+        "text": "Klaim MoE 2,9% dalam toleransi 0,3 poin terhadap hitungan acak sederhana 2,88% (asumsi SRS, p=0,5, z=2,576), status pass.",
+        "evidence_ids": [],
+        "rule_ids": [
+          "R1"
+        ]
+      },
+      {
+        "text": "Kelengkapan disclosure 8/9; redaksi pertanyaan tidak ditemukan di dokumen, status pass.",
+        "evidence_ids": [],
+        "rule_ids": [
+          "R2"
+        ]
+      }
+    ],
+    "caveats": [
+      {
+        "text": "Perhitungan MoE pada R1 menggunakan asumsi sampel acak sederhana (SRS), p=0,5, dan z=2,576; hasil dapat berbeda jika desain sampel aktual tidak sesuai asumsi.",
+        "evidence_ids": [],
+        "rule_ids": [
+          "R1"
+        ]
+      },
+      {
+        "text": "Redaksi pertanyaan tidak tersedia di dokumen (R2); interpretasi indikator tidak dapat diverifikasi terhadap wording pertanyaan.",
+        "evidence_ids": [],
+        "rule_ids": [
+          "R2"
+        ]
+      }
+    ],
+    "visualizations": [
+      {
+        "id": "V1",
+        "type": "metric_bar",
+        "title": "Indikator Ketahanan Pangan Rumah Tangga Juni 2026 (%)",
+        "unit": "%",
+        "data": [
+          {
+            "label": "Ketahanan pangan keluarga baik",
+            "value": 45.8,
+            "evidence_id": "E1"
+          },
+          {
+            "label": "Konsumsi protein hewani harian",
+            "value": 57.3,
+            "evidence_id": "E2"
+          },
+          {
+            "label": "Cadangan pangan cukup 1 minggu",
+            "value": 62.1,
+            "evidence_id": "E3"
+          },
+          {
+            "label": "Kerawanan pangan musiman",
+            "value": 19.6,
+            "evidence_id": "E4"
+          },
+          {
+            "label": "Kepuasan akses pasar pangan",
+            "value": 68.4,
+            "evidence_id": "E5"
+          }
+        ],
+        "evidence_ids": []
+      },
+      {
+        "id": "V2",
+        "type": "metric_table",
+        "title": "Rincian Indikator Periode Juni 2026",
+        "unit": "",
+        "data": [],
+        "evidence_ids": [
+          "E1",
+          "E2",
+          "E3",
+          "E4",
+          "E5"
+        ]
+      }
+    ]
+  }
+}

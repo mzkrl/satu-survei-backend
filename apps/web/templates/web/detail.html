@@ -1,0 +1,313 @@
+{% extends "web/base.html" %}
+
+{% block title %}{{ survey.title }} — SatuSurvey{% endblock %}
+
+{% block extra_head %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<style>
+  .ref-chip {
+    display: inline-block; padding: 0.05rem 0.45rem; margin: 0 0.1rem;
+    border-radius: 9999px; font-size: 0.7rem; font-weight: 700;
+    background: var(--color-accent-light); color: var(--color-accent);
+    cursor: pointer; border: 1px solid transparent;
+  }
+  .ref-chip:hover { border-color: var(--color-accent); }
+</style>
+{% endblock %}
+
+{% block content %}
+<article>
+  {# —— Header —— #}
+  <header class="mb-8">
+    <div class="flex flex-wrap items-start justify-between gap-3">
+      <div>
+        <h1 class="text-2xl font-bold">{{ survey.title }}</h1>
+        <p class="text-neutral text-sm mt-1">
+          {{ survey.publisher }}
+          · Terbit {{ survey.publication_date|date:"j F Y" }}
+          {% if survey.period_start and survey.period_end %}
+            · Periode {{ survey.period_start|date:"j F Y" }}–{{ survey.period_end|date:"j F Y" }}
+          {% endif %}
+        </p>
+        {% if survey.source_url %}
+        <p class="text-xs text-neutral mt-1">Sumber: <a href="{{ survey.source_url }}" class="text-accent underline" rel="noopener">{{ survey.source_url }}</a></p>
+        {% endif %}
+      </div>
+      <span class="chip chip-pass shrink-0">Analisis selesai</span>
+    </div>
+  </header>
+
+  {# —— Skor disclosure —— #}
+  <section id="disclosure" class="bg-card border border-slate-200 rounded-xl p-5 mb-6">
+    <div class="flex items-center justify-between mb-3">
+      <h2 class="font-semibold">Kelengkapan disclosure metodologi</h2>
+      {% if r2 %}
+        <span class="chip chip-{% if r2.status == 'pass' %}pass{% elif r2.status == 'warn' %}warn{% elif r2.status == 'fail' %}fail{% else %}na{% endif %}">
+          {{ disclosure_score }}/{{ disclosure_total }} butir
+        </span>
+      {% endif %}
+    </div>
+    {% if r2 %}
+    <p class="text-sm text-neutral mb-4">{{ r2.message }}</p>
+    {% endif %}
+    <ul class="space-y-2 text-sm">
+      {% for item in disclosure_items %}
+      <li id="d-{{ item.item }}" class="flex items-start gap-2">
+        {% if item.found %}
+          <span class="text-ok font-bold shrink-0" aria-label="ditemukan">✓</span>
+        {% else %}
+          <span class="text-neutral font-bold shrink-0" aria-label="tidak ditemukan">–</span>
+        {% endif %}
+        <div>
+          <span{% if not item.found %} class="text-neutral"{% endif %}>{{ item.label }}</span>
+          {% if item.found and item.excerpt %}
+          <details class="mt-1">
+            <summary class="text-xs text-accent cursor-pointer">Bukti di halaman {{ item.page }}</summary>
+            <blockquote class="text-xs text-neutral border-l-2 border-accent-light pl-2 mt-1">{{ item.excerpt }}</blockquote>
+          </details>
+          {% endif %}
+        </div>
+      </li>
+      {% endfor %}
+    </ul>
+  </section>
+
+  {# —— Panel MoE —— #}
+  <section id="rules" class="bg-card border border-slate-200 rounded-xl p-5 mb-6">
+    <div class="flex items-center justify-between mb-2">
+      <h2 class="font-semibold">Margin of error: klaim vs hitungan</h2>
+      {% if r1 %}
+        <span class="chip chip-{% if r1.status == 'pass' %}pass{% elif r1.status == 'warn' %}warn{% elif r1.status == 'fail' %}fail{% else %}na{% endif %}">
+          {{ r1.get_status_display }}
+        </span>
+      {% endif %}
+    </div>
+    {% if r1 %}<p class="text-sm text-neutral mb-3">{{ r1.message }}</p>{% endif %}
+    {% if moe and moe.moe_expected is not None %}
+    <div class="max-w-md">
+      <canvas id="moe-chart" height="140"></canvas>
+    </div>
+    <dl class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-sm mt-4">
+      <div><dt class="text-neutral text-xs">Klaim</dt><dd class="font-semibold">{{ moe.moe_claimed }}%</dd></div>
+      <div><dt class="text-neutral text-xs">Hitungan (SRS)</dt><dd class="font-semibold">{{ moe.moe_expected }}%</dd></div>
+      <div><dt class="text-neutral text-xs">Selisih</dt><dd class="font-semibold">{{ moe.selisih }} poin</dd></div>
+      <div><dt class="text-neutral text-xs">n · z</dt><dd class="font-semibold">{{ moe.n|floatformat:0 }} · {{ moe.z }}</dd></div>
+    </dl>
+    {% endif %}
+    {% if moe %}
+    <p class="text-xs text-neutral mt-3">Asumsi: {{ moe.asumsi }}</p>
+    {% endif %}
+  </section>
+
+  {# —— Ringkasan & temuan —— #}
+  {% if analysis %}
+  <section id="analysis" class="bg-card border border-slate-200 rounded-xl p-5 mb-6">
+    <h2 class="font-semibold mb-3">Ringkasan analisis</h2>
+    <p class="text-sm leading-relaxed">{{ analysis.summary }}</p>
+
+    {% if analysis.findings %}
+    <h3 class="font-medium text-sm mt-5 mb-2">Temuan</h3>
+    <ul class="space-y-2 text-sm">
+      {% for finding in analysis.findings %}
+      <li class="bg-neutral-bg rounded-lg px-3 py-2">
+        {{ finding.text }}
+        {% for eid in finding.evidence_ids %}
+          <a href="#e-{{ eid }}" class="ref-chip" data-target="e-{{ eid }}">{{ eid }}</a>
+        {% endfor %}
+        {% for rid in finding.rule_ids %}
+          <a href="#rules" class="ref-chip" data-target="rules">{{ rid }}</a>
+        {% endfor %}
+      </li>
+      {% endfor %}
+    </ul>
+    {% endif %}
+
+    {% if analysis.caveats %}
+    <h3 class="font-medium text-sm mt-5 mb-2">Catatan keterbatasan</h3>
+    <ul class="space-y-2 text-sm">
+      {% for caveat in analysis.caveats %}
+      <li class="bg-warn-bg text-warn rounded-lg px-3 py-2">
+        {{ caveat.text }}
+        {% for rid in caveat.rule_ids %}
+          <a href="#rules" class="ref-chip" data-target="rules">{{ rid }}</a>
+        {% endfor %}
+      </li>
+      {% endfor %}
+    </ul>
+    {% endif %}
+
+    {% if analysis.visualizations %}
+    <h3 class="font-medium text-sm mt-5 mb-2">Visualisasi</h3>
+    {% for viz in analysis.visualizations %}
+      {% if viz.type == "metric_bar" and viz.data %}
+      <div class="mb-4">
+        <p class="text-sm font-medium mb-1">{{ viz.title }} <span class="text-neutral font-normal">({{ viz.unit }})</span></p>
+        <ul class="space-y-1">
+          {% for point in viz.data %}
+          <li class="text-sm flex items-center gap-2">
+            <span class="w-40 shrink-0 text-neutral">{{ point.label }}</span>
+            <span class="bg-accent h-4 rounded" style="width: {{ point.value }}%; max-width: 100%; min-width: 2px;"></span>
+            <span class="font-semibold">{{ point.value }}</span>
+            {% if point.evidence_id %}
+              <a href="#e-{{ point.evidence_id }}" class="ref-chip" data-target="e-{{ point.evidence_id }}">{{ point.evidence_id }}</a>
+            {% endif %}
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
+      {% endif %}
+    {% endfor %}
+    {% endif %}
+  </section>
+  {% endif %}
+
+  {# —— Tabel evidence —— #}
+  <section id="evidence" class="bg-card border border-slate-200 rounded-xl p-5 mb-6">
+    <h2 class="font-semibold mb-4">Bukti yang diekstrak</h2>
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm">
+        <thead>
+          <tr class="text-left text-xs text-neutral border-b border-slate-200">
+            <th class="py-2 pr-3">ID</th>
+            <th class="py-2 pr-3">Indikator</th>
+            <th class="py-2 pr-3">Nilai</th>
+            <th class="py-2 pr-3">Satuan</th>
+            <th class="py-2 pr-3">Periode</th>
+            <th class="py-2 pr-3">Wilayah</th>
+            <th class="py-2 pr-3">Halaman</th>
+            <th class="py-2">Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for record in evidence %}
+          <tr id="e-{{ record.key }}" class="border-b border-slate-100 align-top">
+            <td class="py-3 pr-3 font-bold text-accent">{{ record.key }}</td>
+            <td class="py-3 pr-3">
+              {{ record.label_normalized }}
+              {% if record.definition %}
+              <p class="text-xs text-neutral mt-0.5">Definisi: {{ record.definition }}</p>
+              {% endif %}
+              {% if record.unknown_fields %}
+              <p class="text-xs text-neutral mt-0.5">Kolom tidak ditemukan: {{ record.unknown_fields|join:", " }}</p>
+              {% endif %}
+            </td>
+            <td class="py-3 pr-3 font-semibold">{{ record.value }}{% if record.value_raw %} <span class="text-neutral font-normal text-xs">({{ record.value_raw }})</span>{% endif %}</td>
+            <td class="py-3 pr-3">{{ record.unit|default:"—" }}</td>
+            <td class="py-3 pr-3">{{ record.period|default:"—" }}</td>
+            <td class="py-3 pr-3">{{ record.geography|default:"—" }}</td>
+            <td class="py-3 pr-3">{{ record.source_page }}</td>
+            <td class="py-3">
+              {% if record.grounded %}
+                <span class="chip chip-pass">Terverifikasi</span>
+              {% else %}
+                <span class="chip chip-warn">Tidak terverifikasi</span>
+              {% endif %}
+              {% if record.source_excerpt %}
+              <details class="mt-1">
+                <summary class="text-xs text-accent cursor-pointer">Kutipan asli</summary>
+                <blockquote class="text-xs text-neutral border-l-2 border-accent-light pl-2 mt-1">{{ record.source_excerpt }}</blockquote>
+              </details>
+              {% endif %}
+            </td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="8" class="py-4 text-neutral text-center">Tidak ada bukti yang diekstrak.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  {# —— Ambil data ini —— #}
+  <section id="ambil-data" class="bg-card border border-slate-200 rounded-xl p-5">
+    <h2 class="font-semibold mb-3">Ambil data ini</h2>
+    <div class="space-y-3 text-sm">
+      <div>
+        <p class="text-xs text-neutral mb-1">URL JSON</p>
+        <div class="flex gap-2">
+          <code class="bg-neutral-bg rounded px-2 py-1 flex-1 overflow-x-auto">{{ json_url }}</code>
+          <button type="button" class="copy-btn bg-accent-light text-accent px-2 py-1 rounded text-xs font-semibold" data-copy="{{ json_url }}">Salin</button>
+        </div>
+      </div>
+      <div>
+        <p class="text-xs text-neutral mb-1">URL CSV (bukti)</p>
+        <div class="flex gap-2">
+          <code class="bg-neutral-bg rounded px-2 py-1 flex-1 overflow-x-auto">{{ csv_url }}</code>
+          <button type="button" class="copy-btn bg-accent-light text-accent px-2 py-1 rounded text-xs font-semibold" data-copy="{{ csv_url }}">Salin</button>
+        </div>
+      </div>
+      <div>
+        <p class="text-xs text-neutral mb-1">Contoh curl</p>
+        <div class="flex gap-2">
+          <pre class="bg-neutral-bg rounded px-2 py-1 flex-1 overflow-x-auto text-xs">curl {{ json_url }}</pre>
+          <button type="button" class="copy-btn bg-accent-light text-accent px-2 py-1 rounded text-xs font-semibold" data-copy="curl {{ json_url }}">Salin</button>
+        </div>
+      </div>
+      <div>
+        <p class="text-xs text-neutral mb-1">Contoh fetch()</p>
+        <div class="flex gap-2">
+          <pre class="bg-neutral-bg rounded px-2 py-1 flex-1 overflow-x-auto text-xs">const res = await fetch("{{ json_url }}");
+const data = await res.json();</pre>
+          <button type="button" class="copy-btn bg-accent-light text-accent px-2 py-1 rounded text-xs font-semibold" data-copy='const res = await fetch("{{ json_url }}");\nconst data = await res.json();'>Salin</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {% if survey.notes %}
+  <p class="text-xs text-neutral mt-4">Catatan pengunggah: {{ survey.notes }}</p>
+  {% endif %}
+</article>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  {% if moe and moe.moe_expected is not None %}
+  new Chart(document.getElementById("moe-chart"), {
+    type: "bar",
+    data: {
+      labels: ["Klaim survei", "Hitungan (SRS)"],
+      datasets: [{
+        data: [{{ moe.moe_claimed }}, {{ moe.moe_expected }}],
+        backgroundColor: ["#0f766e", "#94a3b8"],
+        borderRadius: 6,
+      }],
+    },
+    options: {
+      indexAxis: "y",
+      plugins: { legend: { display: false } },
+      scales: {
+        x: {
+          beginAtZero: true,
+          title: { display: true, text: "Margin of error (%)" },
+        },
+      },
+    },
+  });
+  {% endif %}
+
+  document.querySelectorAll(".ref-chip").forEach(function (chip) {
+    chip.addEventListener("click", function (event) {
+      event.preventDefault();
+      var id = chip.getAttribute("data-target");
+      var el = document.getElementById(id);
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "center" });
+        el.classList.add("anchor-flash");
+        setTimeout(function () { el.classList.remove("anchor-flash"); }, 1600);
+      }
+    });
+  });
+
+  document.querySelectorAll(".copy-btn").forEach(function (button) {
+    button.addEventListener("click", function () {
+      var text = button.getAttribute("data-copy");
+      navigator.clipboard.writeText(text).then(function () {
+        var original = button.textContent;
+        button.textContent = "Tersalin";
+        setTimeout(function () { button.textContent = original; }, 1500);
+      });
+    });
+  });
+</script>
+{% endblock %}

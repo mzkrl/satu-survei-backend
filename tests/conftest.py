@@ -124,6 +124,11 @@ def make_pdf_bytes(pages: int = 1, text: str = "Laporan survei contoh.") -> byte
     return data
 
 
+@pytest.fixture(autouse=True)
+def force_fake_llm(settings):
+    settings.LLM_PROVIDER = "fake"
+
+
 @pytest.fixture
 def pdf_factory():
     return make_pdf_bytes

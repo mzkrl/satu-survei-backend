@@ -1,0 +1,80 @@
+{% load static %}<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}SatuSurvey{% endblock %}</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            ink: "#0f172a",
+            paper: "#f8fafc",
+            card: "#ffffff",
+            accent: "#0f766e",
+            "accent-light": "#ccfbf1",
+            ok: "#15803d",
+            "ok-bg": "#dcfce7",
+            warn: "#a16207",
+            "warn-bg": "#fef9c3",
+            neutral: "#475569",
+            "neutral-bg": "#f1f5f9",
+          },
+        },
+      },
+    };
+  </script>
+  <style>
+    html { scroll-behavior: smooth; }
+    body { font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; }
+    .chip { display: inline-block; padding: 0.1rem 0.5rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; }
+    .chip-pass { background: var(--color-ok-bg); color: var(--color-ok); }
+    .chip-warn { background: var(--color-warn-bg); color: var(--color-warn); }
+    .chip-fail { background: #fee2e2; color: #b91c1c; }
+    .chip-na { background: var(--color-neutral-bg); color: var(--color-neutral); }
+    .anchor-flash { outline: 3px solid #0f766e; outline-offset: 2px; border-radius: 8px; }
+  </style>
+  {% block extra_head %}{% endblock %}
+</head>
+<body class="bg-paper text-ink min-h-screen flex flex-col">
+  <header class="bg-card border-b border-slate-200 sticky top-0 z-40">
+    <div class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
+      <a href="{% url 'web:home' %}" class="text-lg font-bold text-accent">SatuSurvey</a>
+      <nav class="flex items-center gap-4 text-sm">
+        <a href="{% url 'web:home' %}" class="hover:text-accent">Daftar survei</a>
+        <a href="{% url 'web:simulator' %}" class="hover:text-accent">Simulator MoE</a>
+        <a href="{% url 'web:api_docs' %}" class="hover:text-accent">API</a>
+        {% if user.is_authenticated %}
+          <a href="{% url 'web:upload' %}" class="bg-accent text-white px-3 py-1.5 rounded-lg hover:opacity-90">Rontgen survei</a>
+          <form method="post" action="{% url 'web:logout' %}" class="inline">{% csrf_token %}
+            <button type="submit" class="text-neutral hover:text-accent">Keluar</button>
+          </form>
+        {% else %}
+          <a href="{% url 'web:login' %}" class="bg-accent text-white px-3 py-1.5 rounded-lg hover:opacity-90">Masuk</a>
+        {% endif %}
+      </nav>
+    </div>
+  </header>
+
+  {% if messages %}
+  <div class="max-w-5xl mx-auto px-4 pt-4 w-full">
+    {% for message in messages %}
+    <div class="mb-2 px-4 py-3 rounded-lg text-sm {% if message.tags == 'error' %}bg-warn-bg text-warn{% else %}bg-ok-bg text-ok{% endif %}">{{ message }}</div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <main class="flex-1 max-w-5xl w-full mx-auto px-4 py-8">
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="bg-card border-t border-slate-200">
+    <div class="max-w-5xl mx-auto px-4 py-4 text-xs text-neutral">
+      {{ disclaimer|default:"Alat bantu literasi bukti. Bukan penilaian benar/salah atas survei." }}
+    </div>
+  </footer>
+  {% block extra_js %}{% endblock %}
+</body>
+</html>

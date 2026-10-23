@@ -379,20 +379,20 @@ def run_pipeline(survey_id: int) -> Survey: ...
 **DoD:** satu PDF contoh → `completed` dengan evidence + rule + analisis tersimpan.
 
 ### M8 — API publik (P0 JSON, P1 sisanya)
-- [ ] `GET /api/surveys/` (daftar, hanya `completed` & publik, paginasi)
-- [ ] `GET /api/surveys/{id}/` (detail: metadata, profile, evidence, rules, analysis, `provenance`: model, prompt_version)
-- [ ] `GET /api/surveys/{id}/evidence.csv` (P1)
-- [ ] `POST /api/surveys/` (multipart, login required; sinkron; kembalikan hasil atau error dengan `stage` + `reason` + `attempts`)
-- [ ] CORS `GET` terbuka (`django-cors-headers`) agar bisa ditarik dari situs lain
-- [ ] Test API + skema respons stabil (`schema_version`)
+- [x] `GET /api/surveys/` (daftar, hanya `completed` & publik, paginasi)
+- [x] `GET /api/surveys/{id}/` (detail: metadata, profile, evidence, rules, analysis, `provenance`: model, prompt_version)
+- [x] `GET /api/surveys/{id}/evidence.csv` (P1)
+- [x] `POST /api/surveys/` (multipart, login required; sinkron; kembalikan hasil atau error dengan `stage` + `reason` + `attempts`)
+- [x] CORS `GET` terbuka (`django-cors-headers`) agar bisa ditarik dari situs lain
+- [x] Test API + skema respons stabil (`schema_version`)
 
 **DoD:** `curl https://…/api/surveys/1/` mengembalikan JSON lengkap; CSV terunduh.
 
 ### M9 — Frontend (P0 detail, P1 sisanya)
 Halaman (Django templates + Tailwind CDN):
-- [ ] **`/`** — hero singkat, tombol "Rontgen survei baru", daftar kartu survei (skor disclosure + status MoE), tautan simulator (P1)
-- [ ] **`/upload/`** — form (login required), state loading jelas ("proses bisa memakan 30–90 detik"), tampilan error dengan **tahap + alasan**
-- [ ] **`/surveys/<id>/` (Kartu Survei) — P0:**
+- [x] **`/`** — hero singkat, tombol "Rontgen survei baru", daftar kartu survei (skor disclosure + status MoE), tautan simulator (P1)
+- [x] **`/upload/`** — form (login required), state loading jelas ("proses bisa memakan 30–90 detik"), tampilan error dengan **tahap + alasan**
+- [x] **`/surveys/<id>/` (Kartu Survei) — P0:**
   - Header: judul, penerbit, tanggal, lencana status
   - **Skor Disclosure** (X/9) + daftar butir (✓ ditemukan / – tidak ditemukan di dokumen) dengan tautan ke halaman & kutipan
   - **Panel MoE:** klaim vs hitungan (bar Chart.js) + asumsi tertulis
@@ -401,18 +401,18 @@ Halaman (Django templates + Tailwind CDN):
   - **Caveats** menonjol
   - **Kotak "Ambil data ini":** URL JSON, URL CSV, contoh `curl` dan `fetch()` dengan tombol salin
   - Disclaimer tetap: *"Alat bantu literasi bukti. Bukan penilaian benar/salah atas survei."*
-- [ ] **`/simulator/` (P1)** — slider `n`, tingkat kepercayaan, proporsi `p` → rentang kepercayaan berubah live (JS murni) + penjelasan singkat apa yang bisa dan tidak bisa disimpulkan
-- [ ] **`/api-docs/` (P1)** — halaman statis endpoint + contoh respons
+- [x] **`/simulator/` (P1)** — slider `n`, tingkat kepercayaan, proporsi `p` → rentang kepercayaan berubah live (JS murni) + penjelasan singkat apa yang bisa dan tidak bisa disimpulkan
+- [x] **`/api-docs/` (P1)** — halaman statis endpoint + contoh respons
 
 **Aturan UI:** Django auto-escape selalu aktif; **dilarang `|safe`** pada kutipan/teks LLM. Warna status: hijau/kuning/abu (hindari merah agresif; gunakan merah hanya untuk `fail` MoE dengan kata netral). Mobile-friendly. Semua teks Indonesia.
 
 **DoD:** Kartu Survei dari hasil demo tampil lengkap di layar laptop dan HP.
 
 ### M10 — Demo seed & cache (P0)
-- [ ] Kumpulkan **5–10 PDF survei publik** bertipe teks (campur: lengkap disclosure vs minim; satu dengan MoE janggal bila ada) di `demo/pdfs/`
-- [ ] Jalankan pipeline asli **sekali** per PDF, simpan hasil ke `demo/cached/<sha256>.json`
-- [ ] `python manage.py seed_demo` memuat semuanya ke DB tanpa LLM
-- [ ] Periksa manual tiap hasil: koreksi bila ada ekstraksi salah (jangan demo-kan data yang salah)
+- [x] Kumpulkan **5–10 PDF survei publik** bertipe teks (campur: lengkap disclosure vs minim; satu dengan MoE janggal bila ada) di `demo/pdfs/`
+- [x] Jalankan pipeline asli **sekali** per PDF, simpan hasil ke `demo/cached/<sha256>.json`
+- [x] `python manage.py seed_demo` memuat semuanya ke DB tanpa LLM
+- [x] Periksa manual tiap hasil: koreksi bila ada ekstraksi salah (jangan demo-kan data yang salah)
 
 **DoD:** instalasi baru + `seed_demo` → landing page terisi tanpa API key.
 
@@ -524,6 +524,17 @@ Halaman (Django templates + Tailwind CDN):
 - M7: `deadline` dicek sebelum tiap panggilan LLM di loop retry (agents), TimeoutError → `failed_system`.
 - M7: cache demo menyimpan hanya output LLM (normalization + analysis + grounding); rule engine dijalankan ulang dari cache (deterministik).
 - M7 (verifikasi nyata): 9router (`ANTHROPIC_BASE_URL`) berbicara protokol Anthropic-style `/messages`; model aktif `bzl/deepseek-v4-flash-0731free`; pipeline end-to-end dengan LLM asli → `completed` (norm 1x±115 dtk, analisis 1x±27 dtk, 3 evidence grounded, R1 pass, R2 5/9 warn). Model combo (`cerdas`) timeout; beberapa model upstream 402/429/410.
+- M8: `POST /api/surveys/` diproses sinkron (tanpa background worker) — sesuai skema plan; kegagalan pipeline dikembalikan 400 dengan `stage` + `reason` + `attempts`.
+- M8: `provenance.prompt_version` menyimpan versi prompt tahap terakhir (analisis bila ada, selain itu normalisasi).
+- M8: pemilik upload disimpan di field model `uploaded_by` (bukan `owner`).
+- M8: autouse fixture test memaksa `LLM_PROVIDER=fake` agar tidak ada test yang menyentuh API asli walau `.env` lokal berisi kredensial nyata.
+- Infra VPS (Postgres, Redis, MinIO S3) disediakan pemilik; kredensial hanya di `.env` lokal (gitignored) dengan placeholder di `.env.example`; untuk milestone deploy (M12). Selama pengembangan/testing memakai SQLite + media lokal.
+- M9: login memakai `django.contrib.auth` `LoginView` di `/masuk/` (template sendiri); upload web diproses sinkron lewat `run_pipeline` (sama seperti API); loading overlay ditampilkan via JS sebelum submit.
+- M9: visualisasi `metric_bar` dari LLM dirender sebagai bar CSS sederhana (bukan Chart.js) — hanya bar MoE panel yang memakai Chart.js; menghindari kontrak JS kompleks dengan output LLM.
+- M9: status warna hijau/kuning/abu; merah (`chip-fail`) hanya untuk MoE `fail`, teks netral.
+- M10: demo memakai 6 PDF **sintetis** dengan institusi fiktif (label "Data sintetis" ada di `notes` tiap PDF & tampil di kartu) — menghindari salah menampilkan data institusi nyata.
+- M10: `seed_demo` menyalakan `DEMO_MODE` via `override_settings` sehingga instalasi baru cukup `manage.py seed_demo` tanpa API key; flag `--generate-cache` (butuh API key) untuk membangun cache sekali. Idempoten: survey `completed` dilewati, `processing` (sisa interupsi) diproses ulang.
+- M10 (koreksi manual terdokumentasi): LLM melewatkan kalimat "Redaksi pertanyaan…" di 3 PDF (kepuasan/ekonomi/pangan) → field `question_wording_disclosed` dikoreksi di cache jadi `found` (nilai boolean `true`, sumber halaman 1 sesuai teks PDF); catatan manifest ekonomi diperbarui 7/9→8/9. Hasil akhir: R2 9/9, 8/9, 5/9, 4/9 (fail), 5/9, 9/9; R1 pass×3, fail (MoE 1,8% vs hitungan 3,1%), warn (kuota/panel online), na.
 
 ---
 

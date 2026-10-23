@@ -1,0 +1,317 @@
+{
+  "schema_version": "1.0",
+  "llm_model": "deepseek-v4-flash-0731free",
+  "prompt_version": "analysis_v1",
+  "normalization": {
+    "survey_profile": {
+      "sample_size": {
+        "status": "found",
+        "value": 1000.0,
+        "source": {
+          "page": 1,
+          "excerpt": "Survei ini menggunakan metode multistage random sampling dengan\nsampel sebanyak 1.000 responden."
+        }
+      },
+      "sampling_method": {
+        "status": "found",
+        "value": "multistage random sampling",
+        "source": {
+          "page": 1,
+          "excerpt": "Survei ini menggunakan metode multistage random sampling dengan\nsampel sebanyak 1.000 responden."
+        }
+      },
+      "moe_claimed_pct": {
+        "status": "found",
+        "value": 1.8,
+        "source": {
+          "page": 1,
+          "excerpt": "Tingkat kepercayaan survei ini adalah 95 persen dengan margin of\nerror sebesar 1,8 persen."
+        }
+      },
+      "confidence_level_pct": {
+        "status": "found",
+        "value": 95.0,
+        "source": {
+          "page": 1,
+          "excerpt": "Tingkat kepercayaan survei ini adalah 95 persen dengan margin of\nerror sebesar 1,8 persen."
+        }
+      },
+      "fieldwork_start": {
+        "status": "unknown",
+        "value": null,
+        "source": null
+      },
+      "fieldwork_end": {
+        "status": "unknown",
+        "value": null,
+        "source": null
+      },
+      "sponsor_or_funder": {
+        "status": "unknown",
+        "value": null,
+        "source": null
+      },
+      "conducted_by": {
+        "status": "found",
+        "value": "Asosiasi Data Nusantara Contoh",
+        "source": {
+          "page": 1,
+          "excerpt": "Laporan ini\ndisusun oleh Asosiasi Data Nusantara Contoh."
+        }
+      },
+      "population": {
+        "status": "found",
+        "value": "penduduk usia 15 tahun ke atas",
+        "source": {
+          "page": 1,
+          "excerpt": "Populasi survei adalah penduduk usia 15 tahun ke atas."
+        }
+      },
+      "geography": {
+        "status": "found",
+        "value": "10 kota",
+        "source": {
+          "page": 1,
+          "excerpt": "Survei dilakukan secara tatap muka\ndi 10 kota."
+        }
+      },
+      "mode": {
+        "status": "found",
+        "value": "tatap muka",
+        "source": {
+          "page": 1,
+          "excerpt": "Survei dilakukan secara tatap muka\ndi 10 kota."
+        }
+      },
+      "weighting": {
+        "status": "unknown",
+        "value": null,
+        "source": null
+      },
+      "question_wording_disclosed": {
+        "status": "unknown",
+        "value": null,
+        "source": null
+      }
+    },
+    "evidence_records": [
+      {
+        "id": "E1",
+        "label_original": "responden memiliki literasi digital pada kategori sedang ke atas",
+        "label_normalized": "Persentase responden dengan literasi digital kategori sedang ke atas",
+        "value": 66.3,
+        "value_raw": "66,3 persen",
+        "unit": "%",
+        "period": "2026",
+        "geography": "10 kota",
+        "definition": null,
+        "source": {
+          "page": 1,
+          "excerpt": "Hasil survei menunjukkan 66,3 persen responden memiliki literasi\ndigital pada kategori sedang ke atas."
+        },
+        "unknown_fields": [
+          "definition"
+        ]
+      },
+      {
+        "id": "E2",
+        "label_original": "responden memahami konsep dasar keamanan akun",
+        "label_normalized": "Responden yang memahami konsep dasar keamanan akun",
+        "value": 49.8,
+        "value_raw": "49,8 persen",
+        "unit": "%",
+        "period": "2026",
+        "geography": "10 kota",
+        "definition": null,
+        "source": {
+          "page": 1,
+          "excerpt": "Sebanyak 49,8 persen responden\nmemahami konsep dasar keamanan akun, sementara hanya 23,5 persen\nmampu mengenali upaya penipuan daring dalam skenario uji."
+        },
+        "unknown_fields": [
+          "definition"
+        ]
+      },
+      {
+        "id": "E3",
+        "label_original": "mampu mengenali upaya penipuan daring dalam skenario uji",
+        "label_normalized": "Responden yang mampu mengenali upaya penipuan daring dalam skenario uji",
+        "value": 23.5,
+        "value_raw": "23,5 persen",
+        "unit": "%",
+        "period": "2026",
+        "geography": "10 kota",
+        "definition": null,
+        "source": {
+          "page": 1,
+          "excerpt": "Sebanyak 49,8 persen responden\nmemahami konsep dasar keamanan akun, sementara hanya 23,5 persen\nmampu mengenali upaya penipuan daring dalam skenario uji."
+        },
+        "unknown_fields": [
+          "definition"
+        ]
+      },
+      {
+        "id": "E4",
+        "label_original": "kepuasan terhadap kualitas akses internet di wilayah tempat tinggal",
+        "label_normalized": "Kepuasan terhadap kualitas akses internet di wilayah tempat tinggal",
+        "value": 57.2,
+        "value_raw": "57,2 persen",
+        "unit": "%",
+        "period": "2026",
+        "geography": "10 kota",
+        "definition": null,
+        "source": {
+          "page": 1,
+          "excerpt": "Kepuasan\nterhadap kualitas akses internet di wilayah tempat tinggal berada\ndi angka 57,2 persen."
+        },
+        "unknown_fields": [
+          "definition"
+        ]
+      },
+      {
+        "id": "E5",
+        "label_original": "adopsi dompet digital oleh rumah tangga",
+        "label_normalized": "Adopsi dompet digital oleh rumah tangga",
+        "value": 71.4,
+        "value_raw": "71,4 persen",
+        "unit": "%",
+        "period": "2026",
+        "geography": "10 kota",
+        "definition": null,
+        "source": {
+          "page": 1,
+          "excerpt": "Adopsi dompet digital oleh rumah tangga\ntercatat 71,4 persen."
+        },
+        "unknown_fields": [
+          "definition"
+        ]
+      }
+    ]
+  },
+  "grounding": {
+    "E1": true,
+    "E2": true,
+    "E3": true,
+    "E4": true,
+    "E5": true
+  },
+  "analysis": {
+    "summary": "Survei Literasi Digital Nasional 2026 yang dipublikasikan Asosiasi Data Nusantara Contoh mencatat 66,3% responden memiliki literasi digital kategori sedang ke atas, 49,8% memahami konsep dasar keamanan akun, dan 23,5% mampu mengenali penipuan daring dalam skenario uji. Kepuasan terhadap kualitas akses internet mencapai 57,2%, sementara adopsi dompet digital rumah tangga sebesar 71,4%. Terdapat catatan atas klaim margin of error dan kelengkapan disclosure.",
+    "findings": [
+      {
+        "text": "Sebanyak 66,3% responden berada pada kategori literasi digital sedang ke atas.",
+        "evidence_ids": [
+          "E1"
+        ],
+        "rule_ids": []
+      },
+      {
+        "text": "49,8% responden memahami konsep dasar keamanan akun.",
+        "evidence_ids": [
+          "E2"
+        ],
+        "rule_ids": []
+      },
+      {
+        "text": "23,5% responden mampu mengenali upaya penipuan daring dalam skenario uji.",
+        "evidence_ids": [
+          "E3"
+        ],
+        "rule_ids": []
+      },
+      {
+        "text": "57,2% responden merasa puas terhadap kualitas akses internet di wilayah tempat tinggal.",
+        "evidence_ids": [
+          "E4"
+        ],
+        "rule_ids": []
+      },
+      {
+        "text": "Adopsi dompet digital oleh rumah tangga mencapai 71,4%.",
+        "evidence_ids": [
+          "E5"
+        ],
+        "rule_ids": []
+      },
+      {
+        "text": "Klaim margin of error 1,8% lebih kecil daripada hitungan berbasis sampel acak sederhana sebesar 3,10%.",
+        "evidence_ids": [],
+        "rule_ids": [
+          "R1"
+        ]
+      },
+      {
+        "text": "Skor kelengkapan disclosure 5/9; tanggal pelaksanaan lapangan, pendana/pemberi mandat, redaksi pertanyaan, dan pembobotan tidak ditemukan di dokumen.",
+        "evidence_ids": [],
+        "rule_ids": [
+          "R2"
+        ]
+      }
+    ],
+    "caveats": [
+      {
+        "text": "Klaim margin of error dihitung ulang dengan asumsi sampel acak sederhana, p=0,5, z=1,96; hasil 3,10% berbeda 1,30 poin dari klaim 1,8%.",
+        "evidence_ids": [],
+        "rule_ids": [
+          "R1"
+        ]
+      },
+      {
+        "text": "Dokumen tidak mencantumkan tanggal pelaksanaan lapangan, pendana/pemberi mandat, redaksi pertanyaan, dan pembobotan; skor disclosure 5/9.",
+        "evidence_ids": [],
+        "rule_ids": [
+          "R2"
+        ]
+      }
+    ],
+    "visualizations": [
+      {
+        "id": "V1",
+        "type": "metric_bar",
+        "title": "Indikator Survei Literasi Digital 2026",
+        "unit": "%",
+        "data": [
+          {
+            "label": "Literasi digital sedang ke atas",
+            "value": 66.3,
+            "evidence_id": "E1"
+          },
+          {
+            "label": "Paham keamanan akun",
+            "value": 49.8,
+            "evidence_id": "E2"
+          },
+          {
+            "label": "Kenali penipuan daring",
+            "value": 23.5,
+            "evidence_id": "E3"
+          },
+          {
+            "label": "Kepuasan akses internet",
+            "value": 57.2,
+            "evidence_id": "E4"
+          },
+          {
+            "label": "Adopsi dompet digital",
+            "value": 71.4,
+            "evidence_id": "E5"
+          }
+        ],
+        "evidence_ids": []
+      },
+      {
+        "id": "V2",
+        "type": "metric_table",
+        "title": "Seluruh Indikator Survei",
+        "unit": "",
+        "data": [],
+        "evidence_ids": [
+          "E1",
+          "E2",
+          "E3",
+          "E4",
+          "E5"
+        ]
+      }
+    ]
+  }
+}

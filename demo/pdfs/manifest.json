@@ -1,0 +1,62 @@
+[
+  {
+    "file": "kepuasan-pemerintah-2026.pdf",
+    "title": "Survei Kepuasan Kinerja Pemerintah 2026",
+    "publisher": "Lembaga Riset Contoh Nasional",
+    "publication_date": "2026-04-10",
+    "period_start": "2026-03-01",
+    "period_end": "2026-03-31",
+    "source_url": "",
+    "notes": "Data sintetis untuk demonstrasi SatuSurvey. Disclosure lengkap, MoE konsisten."
+  },
+  {
+    "file": "ekonomi-rumah-tangga-2026.pdf",
+    "title": "Survei Kondisi Ekonomi Rumah Tangga 2026",
+    "publisher": "Pusat Riset Kebijakan Publik Contoh",
+    "publication_date": "2026-06-18",
+    "period_start": "2026-05-01",
+    "period_end": "2026-05-28",
+    "source_url": "",
+    "notes": "Data sintetis untuk demonstrasi SatuSurvey. Disclosure 8/9, MoE konsisten."
+  },
+  {
+    "file": "literasi-digital-2026.pdf",
+    "title": "Survei Literasi Digital Nasional 2026",
+    "publisher": "Asosiasi Data Nusantara Contoh",
+    "publication_date": "2026-08-05",
+    "period_start": "2026-07-01",
+    "period_end": "2026-07-20",
+    "source_url": "",
+    "notes": "Data sintetis untuk demonstrasi SatuSurvey. Disclosure 5/9, MoE klaim di bawah hitungan."
+  },
+  {
+    "file": "kepercayaan-institusi-2026.pdf",
+    "title": "Survei Kepercayaan Publik terhadap Institusi 2026",
+    "publisher": "Kantor Survei Contoh",
+    "publication_date": "2026-09-12",
+    "period_start": "2026-08-01",
+    "period_end": "2026-08-15",
+    "source_url": "",
+    "notes": "Data sintetis untuk demonstrasi SatuSurvey. Disclosure rendah, MoE tidak dinyatakan."
+  },
+  {
+    "file": "panel-online-hobi-digital-2026.pdf",
+    "title": "Survei Panel Online Hobi Digital 2026",
+    "publisher": "Riset Panel Contoh",
+    "publication_date": "2026-10-02",
+    "period_start": "2026-09-10",
+    "period_end": "2026-09-18",
+    "source_url": "",
+    "notes": "Data sintetis untuk demonstrasi SatuSurvey. Sampel kuota/panel online, MoE dinyatakan."
+  },
+  {
+    "file": "pangan-rumah-tangga-2026.pdf",
+    "title": "Survei Ketahanan Pangan Rumah Tangga 2026",
+    "publisher": "Lembaga Studi Pangan Contoh",
+    "publication_date": "2026-07-22",
+    "period_start": "2026-06-01",
+    "period_end": "2026-06-30",
+    "source_url": "",
+    "notes": "Data sintetis untuk demonstrasi SatuSurvey. Disclosure lengkap, kepercayaan 99 persen."
+  }
+]

@@ -1,0 +1,107 @@
+{% extends "web/base.html" %}
+
+{% block title %}Unggah survei — SatuSurvey{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+  <h1 class="text-2xl font-bold mb-2">Rontgen survei baru</h1>
+  <p class="text-neutral text-sm mb-6">
+    Unggah laporan survei dalam format PDF (berbasis teks, bukan hasil scan).
+    Proses ekstraksi dan analisis bisa memakan <strong>30–90 detik</strong> —
+    tunggu hingga halaman selesai dimuat.
+  </p>
+
+  <div id="loading-overlay" class="hidden fixed inset-0 bg-ink/40 z-50 flex items-center justify-center">
+    <div class="bg-card rounded-xl px-6 py-6 text-center max-w-xs mx-4">
+      <div class="animate-spin h-8 w-8 border-4 border-accent border-t-transparent rounded-full mx-auto mb-3"></div>
+      <p class="text-sm font-semibold">Menganalisis survei…</p>
+      <p class="text-xs text-neutral mt-1">Proses bisa memakan 30–90 detik. Jangan tutup halaman.</p>
+    </div>
+  </div>
+
+  <form method="post" enctype="multipart/form-data" id="upload-form" class="bg-card border border-slate-200 rounded-xl p-6 space-y-4">
+    {% csrf_token %}
+    {% if form.non_field_errors %}
+    <div class="bg-warn-bg text-warn text-sm rounded-lg px-3 py-2">{{ form.non_field_errors }}</div>
+    {% endif %}
+
+    <div>
+      <label for="id_title" class="block text-sm font-medium mb-1">Judul laporan *</label>
+      <input type="text" name="title" id="id_title" required value="{{ form.title.value|default:'' }}"
+             class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm">
+      {% for e in form.title.errors %}<p class="text-warn text-xs mt-1">{{ e }}</p>{% endfor %}
+    </div>
+
+    <div>
+      <label for="id_publisher" class="block text-sm font-medium mb-1">Penerbit *</label>
+      <input type="text" name="publisher" id="id_publisher" required value="{{ form.publisher.value|default:'' }}"
+             class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm">
+      {% for e in form.publisher.errors %}<p class="text-warn text-xs mt-1">{{ e }}</p>{% endfor %}
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div>
+        <label for="id_publication_date" class="block text-sm font-medium mb-1">Tanggal terbit *</label>
+        <input type="date" name="publication_date" id="id_publication_date" required
+               value="{{ form.publication_date.value|default:'' }}"
+               class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm">
+        {% for e in form.publication_date.errors %}<p class="text-warn text-xs mt-1">{{ e }}</p>{% endfor %}
+      </div>
+      <div>
+        <label for="id_period_start" class="block text-sm font-medium mb-1">Periode mulai</label>
+        <input type="date" name="period_start" id="id_period_start"
+               value="{{ form.period_start.value|default:'' }}"
+               class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm">
+        {% for e in form.period_start.errors %}<p class="text-warn text-xs mt-1">{{ e }}</p>{% endfor %}
+      </div>
+      <div>
+        <label for="id_period_end" class="block text-sm font-medium mb-1">Periode selesai</label>
+        <input type="date" name="period_end" id="id_period_end"
+               value="{{ form.period_end.value|default:'' }}"
+               class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm">
+        {% for e in form.period_end.errors %}<p class="text-warn text-xs mt-1">{{ e }}</p>{% endfor %}
+      </div>
+    </div>
+
+    <div>
+      <label for="id_source_url" class="block text-sm font-medium mb-1">URL sumber (opsional)</label>
+      <input type="url" name="source_url" id="id_source_url" value="{{ form.source_url.value|default:'' }}"
+             placeholder="https://…"
+             class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm">
+      {% for e in form.source_url.errors %}<p class="text-warn text-xs mt-1">{{ e }}</p>{% endfor %}
+    </div>
+
+    <div>
+      <label for="id_notes" class="block text-sm font-medium mb-1">Catatan (opsional)</label>
+      <textarea name="notes" id="id_notes" rows="2"
+                class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm">{{ form.notes.value|default:'' }}</textarea>
+    </div>
+
+    <div>
+      <label for="id_file" class="block text-sm font-medium mb-1">Berkas PDF laporan survei *</label>
+      <input type="file" name="file" id="id_file" accept="application/pdf" required
+             class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm file:mr-3 file:rounded-lg file:border-0 file:bg-accent-light file:text-accent file:px-3 file:py-1 file:text-sm file:font-semibold">
+      {% for e in form.file.errors %}<p class="text-warn text-xs mt-1">{{ e }}</p>{% endfor %}
+      <p class="text-xs text-neutral mt-1">Maksimal 15 MB, maksimal 60 halaman, harus berbasis teks.</p>
+    </div>
+
+    <button type="submit"
+            class="w-full bg-accent text-white py-2.5 rounded-lg font-semibold hover:opacity-90">
+      Rontgen survei ini
+    </button>
+  </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  const form = document.getElementById("upload-form");
+  const overlay = document.getElementById("loading-overlay");
+  form.addEventListener("submit", function () {
+    if (form.checkValidity()) {
+      overlay.classList.remove("hidden");
+      overlay.classList.add("flex");
+    }
+  });
+</script>
+{% endblock %}

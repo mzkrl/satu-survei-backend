@@ -75,6 +75,10 @@ AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
 ]
 
+LOGIN_URL = "web:login"
+LOGIN_REDIRECT_URL = "web:upload"
+LOGOUT_REDIRECT_URL = "web:home"
+
 LANGUAGE_CODE = "id-id"
 TIME_ZONE = "Asia/Jakarta"
 USE_I18N = True

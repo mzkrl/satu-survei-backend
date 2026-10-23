@@ -1,0 +1,328 @@
+{
+  "schema_version": "1.0",
+  "llm_model": "deepseek-v4-flash-0731free",
+  "prompt_version": "analysis_v1",
+  "normalization": {
+    "survey_profile": {
+      "sample_size": {
+        "status": "found",
+        "value": 800.0,
+        "source": {
+          "page": 1,
+          "excerpt": "Sampel sebanyak 800 responden dipilih sesuai kuota umur dan jenis kelamin."
+        }
+      },
+      "sampling_method": {
+        "status": "found",
+        "value": "Kuota dengan perekrutan responden melalui panel online",
+        "source": {
+          "page": 1,
+          "excerpt": "Survei ini menggunakan metode kuota dengan perekrutan responden melalui panel online."
+        }
+      },
+      "moe_claimed_pct": {
+        "status": "found",
+        "value": 3.0,
+        "source": {
+          "page": 1,
+          "excerpt": "Tingkat kepercayaan survei ini adalah 95 persen dengan margin of error sebesar 3,0 persen."
+        }
+      },
+      "confidence_level_pct": {
+        "status": "found",
+        "value": 95.0,
+        "source": {
+          "page": 1,
+          "excerpt": "Tingkat kepercayaan survei ini adalah 95 persen dengan margin of error sebesar 3,0 persen."
+        }
+      },
+      "fieldwork_start": {
+        "status": "unknown",
+        "value": null,
+        "source": null
+      },
+      "fieldwork_end": {
+        "status": "unknown",
+        "value": null,
+        "source": null
+      },
+      "sponsor_or_funder": {
+        "status": "unknown",
+        "value": null,
+        "source": null
+      },
+      "conducted_by": {
+        "status": "found",
+        "value": "Riset Panel Contoh",
+        "source": {
+          "page": 1,
+          "excerpt": "Laporan disusun oleh Riset Panel Contoh berbasis panel online."
+        }
+      },
+      "population": {
+        "status": "found",
+        "value": "Pengguna internet usia 18 sampai 45 tahun di wilayah perkotaan",
+        "source": {
+          "page": 1,
+          "excerpt": "Populasi survei adalah pengguna internet usia 18 sampai 45 tahun di wilayah perkotaan."
+        }
+      },
+      "geography": {
+        "status": "found",
+        "value": "Wilayah perkotaan",
+        "source": {
+          "page": 1,
+          "excerpt": "Populasi survei adalah pengguna internet usia 18 sampai 45 tahun di wilayah perkotaan."
+        }
+      },
+      "mode": {
+        "status": "found",
+        "value": "Daring melalui tautan kuesioner",
+        "source": {
+          "page": 1,
+          "excerpt": "Survei dilakukan secara daring melalui tautan kuesioner."
+        }
+      },
+      "weighting": {
+        "status": "unknown",
+        "value": null,
+        "source": null
+      },
+      "question_wording_disclosed": {
+        "status": "unknown",
+        "value": null,
+        "source": null
+      }
+    },
+    "evidence_records": [
+      {
+        "id": "E1",
+        "label_original": "62,7 responden menghabiskan lebih dari dua jam sehari untuk hobi digital",
+        "label_normalized": "Responden menghabiskan lebih dari dua jam sehari untuk hobi digital",
+        "value": 62.7,
+        "value_raw": "62,7",
+        "unit": "persen",
+        "period": "unknown",
+        "geography": "perkotaan",
+        "definition": null,
+        "source": {
+          "page": 1,
+          "excerpt": "Hasil menunjukkan 62,7 responden menghabiskan lebih dari dua jam sehari untuk hobi digital."
+        },
+        "unknown_fields": [
+          "period",
+          "definition"
+        ]
+      },
+      {
+        "id": "E2",
+        "label_original": "Streaming video menjadi hobi digital paling populer dengan 78,3 persen",
+        "label_normalized": "Streaming video sebagai hobi digital paling populer",
+        "value": 78.3,
+        "value_raw": "78,3 persen",
+        "unit": "persen",
+        "period": "unknown",
+        "geography": "perkotaan",
+        "definition": null,
+        "source": {
+          "page": 1,
+          "excerpt": "Streaming video menjadi hobi digital paling populer dengan 78,3 persen."
+        },
+        "unknown_fields": [
+          "period",
+          "definition"
+        ]
+      },
+      {
+        "id": "E3",
+        "label_original": "Bermain game daring diikuti 54,9 persen responden",
+        "label_normalized": "Responden yang bermain game daring",
+        "value": 54.9,
+        "value_raw": "54,9 persen",
+        "unit": "persen",
+        "period": "unknown",
+        "geography": "perkotaan",
+        "definition": null,
+        "source": {
+          "page": 1,
+          "excerpt": "Bermain game daring diikuti 54,9 persen responden."
+        },
+        "unknown_fields": [
+          "period",
+          "definition"
+        ]
+      },
+      {
+        "id": "E4",
+        "label_original": "Kreasi konten dilakukan 31,2 persen responden",
+        "label_normalized": "Responden yang melakukan kreasi konten",
+        "value": 31.2,
+        "value_raw": "31,2 persen",
+        "unit": "persen",
+        "period": "unknown",
+        "geography": "perkotaan",
+        "definition": null,
+        "source": {
+          "page": 1,
+          "excerpt": "Kreasi konten dilakukan 31,2 persen responden."
+        },
+        "unknown_fields": [
+          "period",
+          "definition"
+        ]
+      },
+      {
+        "id": "E5",
+        "label_original": "Kepuasan terhadap kualitas pengalaman hobi digital berada di 70,5 persen",
+        "label_normalized": "Tingkat kepuasan terhadap kualitas pengalaman hobi digital",
+        "value": 70.5,
+        "value_raw": "70,5 persen",
+        "unit": "persen",
+        "period": "unknown",
+        "geography": "perkotaan",
+        "definition": null,
+        "source": {
+          "page": 1,
+          "excerpt": "Kepuasan terhadap kualitas pengalaman hobi digital berada di 70,5 persen."
+        },
+        "unknown_fields": [
+          "period",
+          "definition"
+        ]
+      }
+    ]
+  },
+  "grounding": {
+    "E1": true,
+    "E2": true,
+    "E3": true,
+    "E4": true,
+    "E5": true
+  },
+  "analysis": {
+    "summary": "Survei Panel Online Hobi Digital 2026 oleh Riset Panel Contoh mencatat 62,7% responden menghabiskan lebih dari dua jam sehari untuk hobi digital. Streaming video menjadi hobi paling populer (78,3%), disusul game daring (54,9%) dan kreasi konten (31,2%). Kepuasan terhadap kualitas pengalaman hobi digital berada di 70,5%.",
+    "findings": [
+      {
+        "text": "62,7% responden menghabiskan lebih dari dua jam sehari untuk hobi digital.",
+        "evidence_ids": [
+          "E1"
+        ],
+        "rule_ids": []
+      },
+      {
+        "text": "Streaming video menjadi hobi digital paling populer dengan 78,3%.",
+        "evidence_ids": [
+          "E2"
+        ],
+        "rule_ids": []
+      },
+      {
+        "text": "Bermain game daring diikuti 54,9% responden.",
+        "evidence_ids": [
+          "E3"
+        ],
+        "rule_ids": []
+      },
+      {
+        "text": "Kreasi konten dilakukan 31,2% responden.",
+        "evidence_ids": [
+          "E4"
+        ],
+        "rule_ids": []
+      },
+      {
+        "text": "Kepuasan terhadap kualitas pengalaman hobi digital berada di 70,5%.",
+        "evidence_ids": [
+          "E5"
+        ],
+        "rule_ids": []
+      }
+    ],
+    "caveats": [
+      {
+        "text": "Klaim margin of error 3% tidak dapat diverifikasi dengan formula SRS (asumsi sampel acak sederhana, p = 0.5) karena metode sampling terindikasi non-probabilitas (kuota panel online).",
+        "evidence_ids": [],
+        "rule_ids": [
+          "R1"
+        ]
+      },
+      {
+        "text": "Kelengkapan disclosure 5/9; tanggal pelaksanaan, pendana/pemberi mandat, redaksi pertanyaan, dan pembobotan tidak ditemukan dalam dokumen.",
+        "evidence_ids": [],
+        "rule_ids": [
+          "R2"
+        ]
+      },
+      {
+        "text": "Periode data pada seluruh bukti tidak diketahui.",
+        "evidence_ids": [
+          "E1",
+          "E2",
+          "E3",
+          "E4",
+          "E5"
+        ],
+        "rule_ids": []
+      }
+    ],
+    "visualizations": [
+      {
+        "id": "V1",
+        "type": "metric_bar",
+        "title": "Hobi Digital Paling Populer",
+        "unit": "%",
+        "data": [
+          {
+            "label": "Streaming video",
+            "value": 78.3,
+            "evidence_id": "E2"
+          },
+          {
+            "label": "Game daring",
+            "value": 54.9,
+            "evidence_id": "E3"
+          },
+          {
+            "label": "Kreasi konten",
+            "value": 31.2,
+            "evidence_id": "E4"
+          }
+        ],
+        "evidence_ids": []
+      },
+      {
+        "id": "V2",
+        "type": "metric_bar",
+        "title": "Durasi dan Kepuasan Hobi Digital",
+        "unit": "%",
+        "data": [
+          {
+            "label": ">2 jam/hari",
+            "value": 62.7,
+            "evidence_id": "E1"
+          },
+          {
+            "label": "Kepuasan",
+            "value": 70.5,
+            "evidence_id": "E5"
+          }
+        ],
+        "evidence_ids": []
+      },
+      {
+        "id": "V3",
+        "type": "metric_table",
+        "title": "Rekap Indikator Survei",
+        "unit": "",
+        "data": [],
+        "evidence_ids": [
+          "E1",
+          "E2",
+          "E3",
+          "E4",
+          "E5"
+        ]
+      }
+    ]
+  }
+}

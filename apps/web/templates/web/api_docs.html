@@ -1,0 +1,116 @@
+{% extends "web/base.html" %}
+
+{% block title %}Dokumentasi API — SatuSurvey{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl">
+  <h1 class="text-2xl font-bold mb-2">Dokumentasi API</h1>
+  <p class="text-neutral text-sm mb-6">
+    Semua endpoint publik bersifat baca-saja dan terbuka tanpa kunci API.
+    Unggah survei memerlukan sesi login (atau autentikasi sesi DRF).
+  </p>
+
+  <div class="space-y-4 text-sm">
+    <div class="bg-card border border-slate-200 rounded-xl p-5">
+      <div class="flex items-center gap-2 mb-2">
+        <span class="chip chip-pass">GET</span>
+        <code class="font-semibold">/api/surveys/</code>
+      </div>
+      <p class="text-neutral mb-2">Daftar survei yang sudah selesai dan publik. Berpaginasi (20 per halaman).</p>
+      <pre class="bg-neutral-bg rounded-lg px-3 py-2 overflow-x-auto text-xs">{
+  "count": 1,
+  "next": null,
+  "previous": null,
+  "results": [
+    {
+      "id": 1,
+      "title": "Survei Kepuasan Publik 2026",
+      "publisher": "Lembaga Contoh",
+      "disclosure_score": 5,
+      "moe_status": "pass",
+      "status": "completed"
+    }
+  ]
+}</pre>
+    </div>
+
+    <div class="bg-card border border-slate-200 rounded-xl p-5">
+      <div class="flex items-center gap-2 mb-2">
+        <span class="chip chip-pass">GET</span>
+        <code class="font-semibold">/api/surveys/&lt;id&gt;/</code>
+      </div>
+      <p class="text-neutral mb-2">
+        Kartu survei lengkap: metadata, profil metodologi, bukti, aturan,
+        ringkasan analisis, dan <code>provenance</code> (model, versi prompt).
+      </p>
+      <pre class="bg-neutral-bg rounded-lg px-3 py-2 overflow-x-auto text-xs">{
+  "schema_version": "1.0",
+  "survey": { "id": 1, "title": "…", "file_sha256": "…" },
+  "profile": { "sample_size": { "status": "found", "value": 1200, … } },
+  "evidence": [
+    {
+      "key": "E1",
+      "label_original": "Kepuasan kinerja pemerintah",
+      "value": 72.4,
+      "unit": "%",
+      "period": "Maret 2026",
+      "source_page": 1,
+      "source_excerpt": "…",
+      "grounded": true
+    }
+  ],
+  "rules": [
+    { "rule_id": "R1", "status": "pass", "title": "…", "message": "…" },
+    { "rule_id": "R2", "status": "warn", "title": "…", "details": { "score": 5, "total": 9 } }
+  ],
+  "analysis": {
+    "summary": "…",
+    "findings": [ { "text": "…", "evidence_ids": ["E1"], "rule_ids": [] } ],
+    "caveats": [ { "text": "…", "rule_ids": ["R2"] } ]
+  },
+  "provenance": {
+    "llm_model": "…",
+    "prompt_version": "analysis_v1",
+    "total_attempts": 2
+  }
+}</pre>
+    </div>
+
+    <div class="bg-card border border-slate-200 rounded-xl p-5">
+      <div class="flex items-center gap-2 mb-2">
+        <span class="chip chip-pass">GET</span>
+        <code class="font-semibold">/api/surveys/&lt;id&gt;/evidence.csv</code>
+      </div>
+      <p class="text-neutral">Unduhan CSV seluruh baris buki (evidence), siap dibuka di spreadsheet.</p>
+    </div>
+
+    <div class="bg-card border border-slate-200 rounded-xl p-5">
+      <div class="flex items-center gap-2 mb-2">
+        <span class="chip chip-warn">POST</span>
+        <code class="font-semibold">/api/surveys/</code>
+      </div>
+      <p class="text-neutral mb-2">
+        Unggah PDF + metadata (<code>multipart/form-data</code>, login wajib).
+        Diproses secara sinkron. Sukses → <code>201</code> (atau <code>200</code> bila
+        berkas identik sudah pernah diunggah). Gagal → <code>400</code> dengan
+        <code>stage</code>, <code>reason</code>, <code>attempts</code>.
+      </p>
+      <pre class="bg-neutral-bg rounded-lg px-3 py-2 overflow-x-auto text-xs">curl -X POST /api/surveys/ \
+  -H "X-CSRFToken: &lt;token&gt;" \
+  -F "file=@laporan.pdf" \
+  -F "title=Survei Contoh" \
+  -F "publisher=Lembaga X" \
+  -F "publication_date=2026-03-01"</pre>
+    </div>
+
+    <div class="bg-card border border-slate-200 rounded-xl p-5">
+      <h2 class="font-semibold mb-2">Skema respons</h2>
+      <p class="text-neutral">
+        <code>schema_version</code> saat ini <strong>1.0</strong>. Perubahan
+        tidak kompatibel ke depan akan menaikkan angka versi. Field yang
+        tidak diketahui boleh diabaikan klien.
+      </p>
+    </div>
+  </div>
+</div>
+{% endblock %}
