@@ -1,0 +1,12 @@
+Django==5.2.18
+djangorestframework==3.18.3
+pymupdf==2.0
+pydantic==2.14.1
+anthropic==2.1.0
+dj-database-url==3.1.2
+whitenoise==6.12.0
+gunicorn==26.2.0
+django-cors-headers==4.9.0
+pytest==9.1.1
+pytest-django==4.14.0
+scipy==1.18.1
