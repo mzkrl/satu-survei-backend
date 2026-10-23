@@ -22,6 +22,7 @@ Baca `plan.md` dulu. File ini adalah salinan bagian 10 plan.
 .venv\Scripts\python.exe manage.py runserver
 .venv\Scripts\python.exe manage.py migrate
 .venv\Scripts\python.exe manage.py seed_demo          # muat demo dari cache (tanpa LLM)
+docker compose up -d --build                           # produksi (VPS): build + jalankan app (gunicorn, port 8000)
 # produksi (Linux): gunicorn config.wsgi --timeout 180
 ```
 
