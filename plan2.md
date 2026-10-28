@@ -42,7 +42,7 @@ Aturan main `CLAUDE.md` tetap berlaku penuh untuk plan ini (satu milestone per s
 | Kapasitas | Endpoint | Catatan |
 |---|---|---|
 | Chat 47 model | `POST {BASE_URL}/v1/messages` (Anthropic-compat) | jangan hardcode nama model — validasi `/v1/models` runtime |
-| Web search | `POST {BASE_URL}/v1/search` `{model:"tavily"|"exa"|"search-combo", query, max_results}` | **OK live** (tavily ~$0.008, exa ~$0.007 per query); balasan: `results[].{title,url,snippet}` + `usage.search_cost_usd` |
+| Web search | `POST {BASE_URL}/v1/search` `{model:"tavily"|"exa"|"search-combo", query, max_results}` + SearxNG direct `GET {SEARXNG_URL}/search?format=json` | **OK live** (tavily ~$0.008, exa ~$0.007 per query; searxng gratis); balasan9router: `results[].{title,url,snippet}` + `usage.search_cost_usd` |
 | Web fetch | `POST {BASE_URL}/v1/web/fetch` `{model:"tavily"|"exa"|"fetch-combo", url, format:"markdown", max_characters}` | terverifikasi ada; default **off** di v1 |
 | Tavily REST langsung | `POST https://api.tavily.com/search` + `api_key` | **OK live** — fallback bila 9router mati |
 | Exa REST langsung | `POST https://api.exa.ai/search` + header `x-api-key` | fallback bila 9router mati |
@@ -50,7 +50,7 @@ Aturan main `CLAUDE.md` tetap berlaku penuh untuk plan ini (satu milestone per s
 Catatan smoke test (2026-10-28): query "lembaga survei Indonesia" — exa memberi hasil organisasi lebih relevan (lsi.or.id) dibanding tavily; urutan `SEARCH_MODELS` bisa disetel sesuai kebutuhan facet.
 
 - Base URL 9router saat ini: `http://100.115.74.9:20128/v1` (dari `ANTHROPIC_BASE_URL`); satu key yang sama dipakai untuk search/fetch (`NINEROUTER_URL` = host yang sama, tidak perlu env baru).
-- **SearxNG di 9router: tidak dipakai v1.** Error `Blocked URL: internal host` = SSRF-guard 9router menolak host internal; `/v1/models/web` saat ini juga hanya menampilkan `tavily/*`. Opsional nanti bila SearxNG di-expose di host non-internal.
+- **SearxNG: dipakai DIRECT (tanpa 9router), terverifikasi live.** Endpoint9router untuk searxng hardcoded `localhost:8888` + SSRF-guard9router (blokir `localhost`, `*.internal`, IPv4 privat 10/8–192.168/16; Tailscale `100.x` tidak diblokir) dan tidak bisa diganti dari UI panel — jadi jalur kita: backend panggil `SEARXNG_URL` langsung (`GET {SEARXNG_URL}/search?q=…&format=json`). Status VM (2026-10-28, via SSH `tencent`): package Ubuntu+uwsgi, `/etc/searxng/settings.yml` sudah `formats: [html, json]`, `limiter: false`; verifikasi dari luar: **37 hasil**, field `title/url/content`. Gratis unlimited — fallback ketiga setelah tavily/exa.
 
 ## 5. Env baru (semua dari env, tanpa hardcode)
 
@@ -65,7 +65,9 @@ RESEARCH_MAX_TARGETS=3
 RESEARCH_MAX_HOPS=2
 RESEARCH_CALL_TIMEOUT_S=60
 SEARCH_PROVIDER=ninerouter                           # ninerouter | tavily | searxng | none
-SEARCH_MODELS=tavily,exa                             # urutan fallback provider search via 9router
+SEARCH_MODELS=tavily,exa,searxng                     # urutan fallback per query:
+                                                     # tavily+exa via 9router, searxng direct
+SEARXNG_URL=http://100.115.74.9:8888                 # di VPS compose: http://127.0.0.1:8888
 SEARCH_MAX_QUERIES=12
 SEARCH_RESULTS_PER_QUERY=3
 SEARCH_TIMEOUT_S=10
@@ -142,12 +144,13 @@ SearchProvider protocol:
   search(query, *, max_results) -> list[SearchResult]
 
 Implementasi:
-  NineRouterSearch   # POST {BASE_URL}/v1/search; per query coba SEARCH_MODELS berurutan
-                     #   sampai ada hasil (tavily → exa); bila keduanya kosong → fail-open
+  NineRouterSearch   # POST {BASE_URL}/v1/search; untuk provider via 9router (tavily, exa)
+  SearxNGSearch      # GET {SEARXNG_URL}/search?q=…&format=json; direct, gratis unlimited
+                     #   mapper: title→title, url→url, content→snippet
+                     # per query coba SEARCH_MODELS berurutan sampai ada hasil; gagal semua → fail-open
   TavilySearch       # POST https://api.tavily.com/search (fallback9router mati)
   ExaSearch          # POST https://api.exa.ai/search (fallback9router mati)
   FakeSearch         # untuk test & demo cache
-  (SearxNGSearch     # placeholder, disabled sampai host non-internal siap)
 ```
 
 - Urutan `SEARCH_MODELS` menentukan prioritas; boleh juga diisi `search-combo` (rantai fallback otomatis dari 9router) — tapi daftar eksplisit lebih bisa diprediksi & dicatat di provenance.
@@ -197,6 +200,6 @@ Implementasi:
 ## 15. Catatan operasional & lingkungan (2026-10-28)
 
 - Key Tavily & Exa (user, 2026-10-28) disimpan di `.env` (`TAVILY_API_KEY`, `EXA_API_KEY`); **jangan commit, jangan log, jangan tampilkan** di UI/payload. Jalur utama lewat9router (key provider dipegang panel9router), key lokal hanya fallback langsung.
-- SearxNG9router error `Blocked URL: internal host` → SSRF-guard9router; workaround bila ingin dipakai: expose SearxNG di hostname non-internal (tunnel/domain publik) atau set allowlist internal9router. Untuk v1 cukup Tavily via9router.
+- SearxNG: kasus selesai (2026-10-28). "Blocked URL: internal host" = SSRF-guard9router terhadap endpoint hardcoded `localhost:8888`; UI panel tidak menyediakan edit → jalur9router dibuang. Direct ke `SEARXNG_URL` terverifikasi OK (json aktif, limiter false, 37 hasil). Catatan: port8888 hanya terbuka di jaringan tailscale (publik timeout) — backend lokal pakai `http://100.115.74.9:8888`, container di VPS yang sama pakai `http://127.0.0.1:8888`.
 - Pengetahuan yang dipakai: skill Tavily agent-setup (integrasi aplikasi = REST/SDK, kredensial di mekanisme secret proyek, smoke test 1 request live) dan skill 9router `web-search`/`web-fetch` (bentuk endpoint & response ada di §4).
 - `LLM_MODEL` lama tetap untuk tahap lama; riset memakai `RESEARCH_MODEL_*` — jangan campur.
