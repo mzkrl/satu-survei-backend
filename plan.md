@@ -46,7 +46,7 @@ OCR, queue/worker async, verifikasi sumber otomatis, human review queue, deteksi
 | API | **Django REST Framework** | Serializer + browsable API gratis |
 | PDF → teks | **PyMuPDF (`fitz`)**, teks per halaman | Perlu teks halaman untuk grounding check |
 | PDF hasil scan | **Ditolak** dengan pesan jelas (tanpa OCR) | Brief: OCR ditunda |
-| LLM | Adapter `LLMClient`; implementasi `AnthropicClient` + `FakeLLMClient` | Provider-agnostic, test tanpa biaya |
+| LLM | **Qwen Cloud** (`qwen-flash`) | Satu-satunya provider; adapter `QwenClient` berbasis HTTP OpenAI-compatible |
 | Validasi output LLM | **Pydantic v2** | Skema ketat di kode |
 | Eksekusi | **Sinkron** dalam request; hasil demo dari **cache** | Sesuai brief; hindari risiko demo |
 | Auth | Login Django bawaan **hanya untuk upload**; semua halaman baca & API baca **publik** | Minimal tapi aman |
@@ -118,11 +118,14 @@ DEBUG=1
 ALLOWED_HOSTS=localhost,127.0.0.1
 DATABASE_URL=sqlite:///db.sqlite3
 
-LLM_PROVIDER=fake            # fake | anthropic
-ANTHROPIC_API_KEY=
-LLM_MODEL=                   # isi nama model terbaru dari dokumentasi Anthropic; jangan di-hardcode di kode
+LLM_MODEL=                   # override generik (opsional; QWEN_MODEL diprioritaskan)
 LLM_TIMEOUT_S=90
 PIPELINE_MAX_RETRIES=2
+
+# Qwen Cloud (satu-satunya provider, OpenAI-compatible)
+QWEN_API_KEY=                # isi Qwen Cloud API key
+QWEN_MODEL=qwen-flash
+QWEN_BASE_URL=https://ap-southeast-1.maas.qwencloudapi.com/compatible-mode/v1
 
 MAX_UPLOAD_MB=15
 MAX_PAGES=60
@@ -249,8 +252,8 @@ class LLMClient(Protocol):
     def complete(self, *, system: str, user: str, timeout_s: int) -> LLMResponse: ...
     # LLMResponse: text, model, latency_ms
 ```
-- `AnthropicClient`: pakai SDK resmi `anthropic`; nama model dari `LLM_MODEL`; tangkap error jaringan/timeout → raise `LLMProviderError` (menjadi `failed_system`, **tidak** di-retry).
-- `FakeLLMClient`: mengembalikan JSON dari fixture di `tests/fixtures/` atau `demo/cached/`; bisa diprogram untuk mengembalikan output rusak di percobaan ke-1 (untuk menguji retry).
+- `QwenClient`: satu-satunya implementasi `LLMClient`. Memanggil endpoint OpenAI-compatible Qwen Cloud (`QWEN_BASE_URL`, default region Singapore) memakai `urllib` standard library, tanpa SDK provider eksternal. Model default `qwen-flash` dari `QWEN_MODEL`; error jaringan/timeout/HTTP dipetakan ke `LLMProviderError` dengan label "Qwen Cloud" (menjadi `failed_system`, **tidak** di-retry).
+- `get_llm_client()` selalu membuat `QwenClient` dari `QWEN_API_KEY`, `QWEN_MODEL`, dan `QWEN_BASE_URL`.
 
 ### 8.4 Normalization Agent (`agents/normalization.py`)
 **System prompt (spesifikasi isi; simpan di `agents/prompts/normalization_v1.txt`):**
@@ -349,7 +352,7 @@ def run_pipeline(survey_id: int) -> Survey: ...
 **DoD:** PDF sampel menghasilkan teks per halaman; PDF scan → `rejected_file` dengan pesan jelas.
 
 ### M3 — LLM adapter + Fake (P0)
-- [x] `LLMClient` Protocol, `AnthropicClient` (timeout, error mapping), `FakeLLMClient` (bisa diprogram: output rusak lalu benar)
+- [x] `LLMClient` Protocol, `QwenClient` (timeout, error mapping)
 - [x] Pilih klien via `LLM_PROVIDER`
 
 **DoD:** test memakai Fake; **tidak ada test yang memanggil API asli**.
@@ -439,7 +442,7 @@ Halaman (Django templates + Tailwind CDN):
 
 1. **Baca `plan.md` dulu.** Kerjakan **satu milestone per sesi**, jangan loncat. Centang checkbox saat selesai.
 2. **Test dulu** untuk logika murni (`rules/`, `grounding`, `qc`, `metadata`). Jalankan `pytest` sebelum menyatakan selesai.
-3. **Jangan pernah memanggil API LLM asli di test.** Gunakan `FakeLLMClient`.
+3. **Jangan pernah memanggil API LLM asli di test.** Gunakan stub/mock `LLMClient`; jangan mengandalkan API key nyata.
 4. **Jangan menambah dependency** di luar daftar M0 tanpa bertanya.
 5. **Tidak ada logika bisnis di view.** View hanya memanggil service.
 6. **Output LLM = usulan, bukan fakta.** Semuanya lewat QC; skor/rule dihitung kode, bukan LLM.
@@ -507,9 +510,9 @@ Halaman (Django templates + Tailwind CDN):
 - M1: field `source_url` di form memakai `assume_scheme="https"` — mengikuti deprecation Django 5.2 (URLField default https di Django 6); validasi URL tetap dicek ulang di `metadata.py`.
 - M1: import `pymupdf` (bukan `fitz`) — API `fitz` sudah deprecated di rilis PyMuPDF 2.0.
 - M2: PDF tanpa teks (halaman kosong/gambar) dipakai sebagai representasi "PDF scan" di test — cukup untuk mendeteksi rata-rata karakter di bawah batas, tanpa perlu PDF berisi gambar sungguhan.
-- M3: `ANTHROPIC_API_KEY` diekspos lewat `settings` (dibaca dari env) — factory `get_llm_client()` memakai settings agar mudah di-override di test.
-- M3: `AnthropicClient` menerima objek `client` opsional — test menyuntikkan stub sehingga tidak ada panggilan API asli.
-- M3: SDK `anthropic` 2.1.0 memakai fork `httpx2` (bukan `httpx`) — test timeout memakai `httpx2.Request`.
+- M3: **Qwen Cloud** adalah satu-satunya provider: `QWEN_API_KEY` + `QWEN_MODEL=qwen-flash` + `QWEN_BASE_URL` di `.env`. Endpoint Qwen Cloud bersifat OpenAI-compatible dan dipanggil langsung dengan `urllib` (standard library), sehingga tidak ada dependency SDK provider eksternal.
+- M3: Provider `anthropic`, `groq`, dan `fake` sudah dihapus dari kode produksi.
+- M3: Dependency `groq` dihapus dari `requirements.txt`.
 - M4: tiap kunci profile memakai `ProfileField[T]` bertipe (angka/teks/boolean) — spesifikasi contoh memakai `Any`, ketat ketik lebih aman tanpa mengubah kontrak JSON.
 - M4: fallback grounding berurutan: substring → padanan huruf/angka tanpa tanda baca → jendela `SequenceMatcher` (step separuh panjang kutipan) — jendela penuh O(n·m) terlalu lambat untuk dokumen panjang.
 - M4: prompt retry menyertakan output sebelumnya hanya saat error parse JSON (bagian 8.4); error schema/QC cukup menyertakan daftar error.
@@ -527,7 +530,7 @@ Halaman (Django templates + Tailwind CDN):
 - M8: `POST /api/surveys/` diproses sinkron (tanpa background worker) — sesuai skema plan; kegagalan pipeline dikembalikan 400 dengan `stage` + `reason` + `attempts`.
 - M8: `provenance.prompt_version` menyimpan versi prompt tahap terakhir (analisis bila ada, selain itu normalisasi).
 - M8: pemilik upload disimpan di field model `uploaded_by` (bukan `owner`).
-- M8: autouse fixture test memaksa `LLM_PROVIDER=fake` agar tidak ada test yang menyentuh API asli walau `.env` lokal berisi kredensial nyata.
+- M8: autouse fixture test memaksa `LLM_PROVIDER=fake` sebagai pengaman agar tidak ada test yang menyentuh API asli walau `.env` lokal berisi kredensial nyata; test yang butuh LLM selalu menyuntikkan mock client.
 - Infra VPS (Postgres, Redis, MinIO S3) disediakan pemilik; kredensial hanya di `.env` lokal (gitignored) dengan placeholder di `.env.example`; untuk milestone deploy (M12). Selama pengembangan/testing memakai SQLite + media lokal.
 - M9: login memakai `django.contrib.auth` `LoginView` di `/masuk/` (template sendiri); upload web diproses sinkron lewat `run_pipeline` (sama seperti API); loading overlay ditampilkan via JS sebelum submit.
 - M9: visualisasi `metric_bar` dari LLM dirender sebagai bar CSS sederhana (bukan Chart.js) — hanya bar MoE panel yang memakai Chart.js; menghindari kontrak JS kompleks dengan output LLM.

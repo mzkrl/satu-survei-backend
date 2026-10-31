@@ -125,8 +125,9 @@ def make_pdf_bytes(pages: int = 1, text: str = "Laporan survei contoh.") -> byte
 
 
 @pytest.fixture(autouse=True)
-def force_fake_llm(settings):
-    settings.LLM_PROVIDER = "fake"
+def force_no_real_llm(settings):
+    # Pengaman: jangan sampai test menyentuh API Qwen sungguhan.
+    settings.QWEN_API_KEY = ""
 
 
 @pytest.fixture

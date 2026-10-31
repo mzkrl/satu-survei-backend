@@ -8,8 +8,9 @@ from django.utils import timezone
 
 
 def _parse_date(value: date | datetime | str | None, field: str, errors: list[str]) -> date | None:
+    # Jika value adalah None atau string kosong, kembalikan None (bukan error)
+    # Ini akan membuat tanggal dianggap "unknown" bukan error
     if value is None or (isinstance(value, str) and not value.strip()):
-        errors.append(f"{field}: wajib diisi.")
         return None
     if isinstance(value, datetime):
         return value.date()
@@ -18,7 +19,7 @@ def _parse_date(value: date | datetime | str | None, field: str, errors: list[st
     try:
         return date.fromisoformat(str(value).strip())
     except ValueError:
-        errors.append(f"{field}: format tidak valid (pakai YYYY-MM-DD).")
+        # Jika format salah, kembalikan None (unknown) tanpa error
         return None
 
 
@@ -29,20 +30,18 @@ def _is_valid_url(value: str) -> bool:
 
 def validate_metadata(
     *,
-    title: str,
-    publisher: str,
-    publication_date: date | datetime | str | None,
-    period_start: date | datetime | str | None,
-    period_end: date | datetime | str | None,
+    title: str = "",
+    publisher: str = "",
+    publication_date: date | datetime | str | None = None,
+    period_start: date | datetime | str | None = None,
+    period_end: date | datetime | str | None = None,
     source_url: str = "",
     notes: str = "",
 ) -> list[str]:
     errors: list[str] = []
 
-    if not title.strip():
-        errors.append("title: wajib diisi.")
-    if not publisher.strip():
-        errors.append("publisher: wajib diisi.")
+    # title and publisher opsional (akan diisi dari PDF extraction atau fallback nama file)
+    # Tidak divalidasi sebagai "wajib" di sini
 
     pub_date = _parse_date(publication_date, "publication_date", errors)
     start_date = _parse_date(period_start, "period_start", errors)

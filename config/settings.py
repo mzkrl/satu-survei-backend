@@ -127,10 +127,17 @@ else:
 
 CORS_ALLOW_ALL_ORIGINS = env_bool("CORS_ALLOW_ALL_ORIGINS", True)
 
-LLM_PROVIDER = env_str("LLM_PROVIDER", "fake")
-ANTHROPIC_API_KEY = env_str("ANTHROPIC_API_KEY", "")
-ANTHROPIC_BASE_URL = env_str("ANTHROPIC_BASE_URL", "")
+# Override generik (opsional). QWEN_MODEL lebih diprioritaskan.
 LLM_MODEL = env_str("LLM_MODEL", "")
+
+# Qwen Cloud (satu-satunya provider; OpenAI-compatible, region Singapore)
+QWEN_API_KEY = env_str("QWEN_API_KEY", "")
+QWEN_MODEL = env_str("QWEN_MODEL", "qwen-flash")
+QWEN_BASE_URL = env_str(
+    "QWEN_BASE_URL",
+    "https://ap-southeast-1.maas.qwencloudapi.com/compatible-mode/v1",
+)
+
 LLM_TIMEOUT_S = env_int("LLM_TIMEOUT_S", 90)
 PIPELINE_MAX_RETRIES = env_int("PIPELINE_MAX_RETRIES", 2)
 

@@ -13,11 +13,11 @@ class Survey(models.Model):
         FAILED_ANALYSIS = "failed_analysis", "Analisis gagal"
         FAILED_SYSTEM = "failed_system", "Sistem gagal"
 
-    title = models.CharField(max_length=300)
-    publisher = models.CharField(max_length=300)
-    publication_date = models.DateField()
-    period_start = models.DateField()
-    period_end = models.DateField()
+    title = models.CharField(max_length=300, blank=True, default="")
+    publisher = models.CharField(max_length=300, blank=True, default="")
+    publication_date = models.DateField(blank=True, null=True)
+    period_start = models.DateField(blank=True, null=True)
+    period_end = models.DateField(blank=True, null=True)
     source_url = models.URLField(blank=True, default="")
     notes = models.TextField(blank=True, default="")
     file = models.FileField(upload_to="surveys/%Y/%m/", null=True, blank=True)
@@ -38,7 +38,7 @@ class Survey(models.Model):
         ordering = ["-created_at"]
 
     def __str__(self) -> str:
-        return self.title
+        return self.title or f"Survey {self.pk}"
 
 
 class PageText(models.Model):
