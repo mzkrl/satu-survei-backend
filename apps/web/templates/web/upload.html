@@ -26,24 +26,23 @@
     {% endif %}
 
     <div>
-      <label for="id_title" class="block text-sm font-medium mb-1">Judul laporan *</label>
-      <input type="text" name="title" id="id_title" required value="{{ form.title.value|default:'' }}"
+      <label for="id_title" class="block text-sm font-medium mb-1">Judul laporan (opsional)</label>
+      <input type="text" name="title" id="id_title" value="{{ form.title.value|default:'' }}"
              class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm">
       {% for e in form.title.errors %}<p class="text-warn text-xs mt-1">{{ e }}</p>{% endfor %}
     </div>
 
     <div>
-      <label for="id_publisher" class="block text-sm font-medium mb-1">Penerbit *</label>
-      <input type="text" name="publisher" id="id_publisher" required value="{{ form.publisher.value|default:'' }}"
+      <label for="id_publisher" class="block text-sm font-medium mb-1">Penerbit (opsional)</label>
+      <input type="text" name="publisher" id="id_publisher" value="{{ form.publisher.value|default:'' }}"
              class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm">
       {% for e in form.publisher.errors %}<p class="text-warn text-xs mt-1">{{ e }}</p>{% endfor %}
     </div>
 
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
       <div>
-        <label for="id_publication_date" class="block text-sm font-medium mb-1">Tanggal terbit *</label>
-        <input type="date" name="publication_date" id="id_publication_date" required
-               value="{{ form.publication_date.value|default:'' }}"
+        <label for="id_publication_date" class="block text-sm font-medium mb-1">Tanggal terbit (opsional)</label>
+        <input type="date" name="publication_date" id="id_publication_date" value="{{ form.publication_date.value|default:'' }}"
                class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm">
         {% for e in form.publication_date.errors %}<p class="text-warn text-xs mt-1">{{ e }}</p>{% endfor %}
       </div>

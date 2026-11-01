@@ -12,10 +12,30 @@ from apps.surveys.storage import compute_sha256
 
 
 def _build_survey_fields(cleaned_data: dict[str, Any]) -> dict[str, Any]:
+    title = str(cleaned_data.get("title") or "").strip()
+    publisher = str(cleaned_data.get("publisher") or "").strip()
+    publication_date = cleaned_data.get("publication_date")
+
+    # Fallback: ambil judul dari nama file jika tidak ada di metadata
+    if not title and "file" in cleaned_data:
+        from django.core.files.uploadedfile import UploadedFile
+        uploaded_file = cleaned_data["file"]
+        if isinstance(uploaded_file, UploadedFile):
+            title = uploaded_file.name.rsplit(".", 1)[0] if uploaded_file.name else ""
+
+    # Fallback: publisher jadi "Unknown" jika tidak ada
+    if not publisher:
+        publisher = "Unknown"
+
+    # Fallback: publication_date jadi None (Unknown) jika tidak ada
+    # (diasimpan ke DB sebagai NULL; AI akan menganggapnya sebagai "unknown")
+    if not publication_date:
+        publication_date = None
+
     return {
-        "title": str(cleaned_data.get("title") or "").strip(),
-        "publisher": str(cleaned_data.get("publisher") or "").strip(),
-        "publication_date": cleaned_data.get("publication_date"),
+        "title": title,
+        "publisher": publisher,
+        "publication_date": publication_date,
         "period_start": cleaned_data.get("period_start"),
         "period_end": cleaned_data.get("period_end"),
         "source_url": str(cleaned_data.get("source_url") or "").strip(),

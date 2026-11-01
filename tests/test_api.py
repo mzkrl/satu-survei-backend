@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from typing import Any
 from unittest.mock import patch
 
 import pytest
@@ -7,9 +8,10 @@ from django.contrib.auth import get_user_model
 from django.core.files.uploadedfile import SimpleUploadedFile
 from rest_framework.test import APIClient
 
-from apps.agents.llm import FakeLLMClient
+from apps.agents.llm import LLMResponse
 from apps.pipeline.orchestrator import run_pipeline
 from apps.surveys.models import Survey
+
 from tests.conftest import (
     EVIDENCE_EXCERPT,
     PAGE_ONE_TEXT,
@@ -34,10 +36,35 @@ def user(db):
     )
 
 
+# Helper mock LLM client untuk tes
+class _MockLLMClient:
+    """Mock LLM client untuk tes yang mirip LLM client."""
+
+    def __init__(self, responses: list[str | Exception] | None = None):
+        self._responses = list(responses) if responses else []
+        self.calls: list[dict[str, Any]] = []
+        self._index = 0
+
+    def complete(self, *, system: str, user: str, timeout_s: int) -> LLMResponse:
+        self.calls.append({"system": system, "user": user, "timeout_s": timeout_s})
+        if self._index >= len(self._responses):
+            raise Exception("Mock: respons habis")
+        item = self._responses[self._index]
+        self._index += 1
+        if isinstance(item, Exception):
+            raise item
+        return LLMResponse(text=item, model="mock-model", latency_ms=1)
+
+
+def _make_mock_llm_client(responses: list[str | Exception] | None = None) -> _MockLLMClient:
+    """Helper membuat mock LLM client untuk tes."""
+    return _MockLLMClient(responses)
+
+
 def run_fake_pipeline(survey: Survey, responses: list[str]) -> Survey:
     with patch(
         "apps.pipeline.orchestrator.get_llm_client",
-        return_value=FakeLLMClient(responses),
+        return_value=_make_mock_llm_client(responses),
     ):
         run_pipeline(survey.pk)
     survey.refresh_from_db()
@@ -116,7 +143,7 @@ class TestSurveyDetail:
         assert rule_ids == {"R1", "R2"}
         assert payload["analysis"]["summary"]
         provenance = payload["provenance"]
-        assert provenance["llm_model"] == "fake-model"
+        assert provenance["llm_model"] == "mock-model"
         assert provenance["prompt_version"] == "analysis_v1"
         assert provenance["total_attempts"] == 2
 
@@ -158,7 +185,7 @@ class TestSurveyUpload:
         api.force_authenticate(user=user)
         with patch(
             "apps.pipeline.orchestrator.get_llm_client",
-            return_value=FakeLLMClient(
+            return_value=_make_mock_llm_client(
                 [make_normalization_json(), make_analysis_json()]
             ),
         ):
@@ -195,7 +222,7 @@ class TestSurveyUpload:
         api.force_authenticate(user=user)
         with patch(
             "apps.pipeline.orchestrator.get_llm_client",
-            return_value=FakeLLMClient(["bukan json"] * 3),
+            return_value=_make_mock_llm_client(["bukan json"] * 3),
         ):
             response = upload(api, make_pdf_bytes(text=PDF_TEXT), valid_metadata)
         assert response.status_code == 400

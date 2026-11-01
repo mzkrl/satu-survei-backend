@@ -7,7 +7,7 @@ from django.contrib.auth import get_user_model
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.urls import reverse
 
-from apps.agents.llm import FakeLLMClient
+from apps.agents.llm import LLMProviderError, LLMResponse
 from apps.pipeline.orchestrator import run_pipeline
 from apps.surveys.models import Survey
 from tests.conftest import (
@@ -20,6 +20,21 @@ from tests.conftest import (
 PDF_TEXT = PAGE_ONE_TEXT * 2
 
 
+class _MockLLMClient:
+    """Mock LLM client untuk tes tanpa memanggil API asli."""
+
+    def __init__(self, responses: list[str | Exception] | None = None) -> None:
+        self._responses = list(responses or [])
+
+    def complete(self, *, system: str, user: str, timeout_s: int) -> LLMResponse:
+        if not self._responses:
+            raise LLMProviderError("Mock: respons habis")
+        item = self._responses.pop(0)
+        if isinstance(item, Exception):
+            raise item
+        return LLMResponse(text=item, model="mock-model", latency_ms=1)
+
+
 @pytest.fixture
 def user(db):
     return get_user_model().objects.create_user(
@@ -30,7 +45,7 @@ def user(db):
 def run_fake_pipeline(survey: Survey, responses: list[str]) -> Survey:
     with patch(
         "apps.pipeline.orchestrator.get_llm_client",
-        return_value=FakeLLMClient(responses),
+        return_value=_MockLLMClient(responses),
     ):
         run_pipeline(survey.pk)
     survey.refresh_from_db()
@@ -98,7 +113,7 @@ class TestUpload:
         )
         with patch(
             "apps.pipeline.orchestrator.get_llm_client",
-            return_value=FakeLLMClient(
+            return_value=_MockLLMClient(
                 [make_normalization_json(), make_analysis_json()]
             ),
         ):
@@ -115,7 +130,7 @@ class TestUpload:
         )
         with patch(
             "apps.pipeline.orchestrator.get_llm_client",
-            return_value=FakeLLMClient(["bukan json"] * 3),
+            return_value=_MockLLMClient(["bukan json"] * 3),
         ):
             response = client.post(reverse("web:upload"), data)
         assert response.status_code == 400
