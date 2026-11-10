@@ -113,6 +113,9 @@ CREATE TABLE claims (
     analysis_id UUID NOT NULL
         REFERENCES analyses(id) ON DELETE CASCADE,
 
+    document_id UUID NOT NULL
+        REFERENCES documents(id) ON DELETE CASCADE,
+
     statement TEXT NOT NULL,
 
     category VARCHAR(100),
@@ -124,6 +127,11 @@ CREATE TABLE claims (
             'evaluated',
             'failed'
         )),
+
+    raw_excerpt TEXT,
+
+    page_number INTEGER
+        CHECK (page_number IS NULL OR page_number > 0),
 
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
@@ -142,7 +150,8 @@ CREATE TABLE evaluations (
         CHECK (verdict IN (
             'valid',
             'questionable',
-            'invalid'
+            'invalid',
+            'insufficient_evidence'
         )),
 
     confidence NUMERIC(5, 4)

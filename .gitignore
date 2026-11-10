@@ -2,3 +2,4 @@
 app/__pycache__
 venv
 storage/minio/.minio.sys
+storage/minio/satusurvey

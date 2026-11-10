@@ -1,13 +1,15 @@
 from datetime import datetime
 from decimal import Decimal
-from typing import Any
+from typing import Any, Literal
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field
 
+Verdict = Literal["valid", "questionable", "invalid", "insufficient_evidence"]
+
 
 class EvaluationBase(BaseModel):
-    verdict: str
+    verdict: Verdict
     confidence: Decimal | None = Field(default=None, ge=0, le=1)
     explanation: str | None = None
     evidence_ids: list[Any] = Field(default_factory=list)
@@ -20,7 +22,7 @@ class EvaluationCreate(EvaluationBase):
 
 
 class EvaluationUpdate(BaseModel):
-    verdict: str | None = None
+    verdict: Verdict | None = None
     confidence: Decimal | None = Field(default=None, ge=0, le=1)
     explanation: str | None = None
     evidence_ids: list[Any] | None = None

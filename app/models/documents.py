@@ -33,3 +33,6 @@ class Documents(Base):
     evidence = relationship(
         "Evidence", back_populates="document", cascade="all, delete-orphan"
     )
+    claims = relationship(
+        "Claims", back_populates="document", cascade="all, delete-orphan"
+    )
