@@ -14,7 +14,8 @@ class Settings(BaseSettings):
 
     # Browser origins allowed to call the API (comma separated).
     CORS_ORIGINS: str = (
-        "https://satu-survey.vercel.app/"
+        "https://satu-survey.vercel.app/",
+        "https://n3level.id"
     )
 
     # MinIO Object Storage
