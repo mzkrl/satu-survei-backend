@@ -75,17 +75,21 @@ async def proxy_llm(
     client = httpx.AsyncClient(
         timeout=httpx.Timeout(settings.LLM_TIMEOUT_SECONDS, connect=10.0)
     )
-    proxy_request = client.build_request(
-        request.method,
-        target,
-        headers=headers,
-        content=body or None,
-    )
     try:
+        proxy_request = client.build_request(
+            request.method,
+            target,
+            headers=headers,
+            content=body or None,
+        )
         upstream = await client.send(proxy_request, stream=True)
     except httpx.HTTPError as exc:
         await client.aclose()
         logger.warning("llm proxy upstream error: %s", exc)
+        raise HTTPException(status_code=502, detail="LLM upstream unavailable") from exc
+    except Exception as exc:
+        await client.aclose()
+        logger.warning("llm proxy request error: %s", exc)
         raise HTTPException(status_code=502, detail="LLM upstream unavailable") from exc
 
     response_headers = {
@@ -96,7 +100,9 @@ async def proxy_llm(
 
     async def stream_body():
         try:
-            async for chunk in upstream.aiter_raw():
+            # ``aiter_bytes`` decodes any upstream compression; the matching
+            # content-encoding header is stripped above.
+            async for chunk in upstream.aiter_bytes():
                 yield chunk
         finally:
             await upstream.aclose()

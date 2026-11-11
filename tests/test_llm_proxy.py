@@ -31,6 +31,10 @@ class FakeUpstreamResponse:
         for chunk in self.chunks:
             yield chunk
 
+    async def aiter_bytes(self):
+        for chunk in self.chunks:
+            yield chunk
+
     async def aclose(self):
         self.closed = True
 
@@ -96,9 +100,11 @@ def _install_transport(monkeypatch):
 
 
 @pytest.fixture(autouse=True)
-def _clear_dependency_overrides():
+def _restore_dependency_overrides():
+    previous = dict(main.app.dependency_overrides)
     yield
     main.app.dependency_overrides.clear()
+    main.app.dependency_overrides.update(previous)
 
 
 @pytest.fixture
