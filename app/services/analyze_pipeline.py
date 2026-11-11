@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import datetime as dt
 import logging
+from decimal import Decimal
 from typing import Any
 
 from sqlalchemy.orm import Session
@@ -17,19 +19,18 @@ logger = logging.getLogger(__name__)
 
 
 def _json_safe(obj: Any) -> Any:
-    if hasattr(obj, "isoformat"):
-        try:
-            return obj.isoformat()
-        except Exception:
-            pass
-    if hasattr(obj, "__float__") and not isinstance(obj, bool):
-        try:
-            return float(obj)
-        except Exception:
-            return str(obj)
+    """Convert DB values (Decimal/date/UUID) without losing integers."""
+    if obj is None or isinstance(obj, (str, int, float, bool)):
+        return obj
+    if isinstance(obj, Decimal):
+        return float(obj)
+    if isinstance(obj, (dt.date, dt.datetime)):
+        return obj.isoformat()
+    if hasattr(obj, "hex") and hasattr(obj, "int"):  # UUID
+        return str(obj)
     if isinstance(obj, dict):
-        return {k: _json_safe(v) for k, v in obj.items()}
-    if isinstance(obj, (list, tuple)):
+        return {str(k): _json_safe(v) for k, v in obj.items()}
+    if isinstance(obj, (list, tuple, set)):
         return [_json_safe(v) for v in obj]
     return obj
 

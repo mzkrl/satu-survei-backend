@@ -1,8 +1,7 @@
-from datetime import date
+from datetime import date, datetime
 from typing import Any
-from uuid import UUID
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class DocumentInfo(BaseModel):
@@ -27,21 +26,22 @@ class ClaimViz(BaseModel):
     verdict: str
     confidence: float | None = None
     explanation: str | None = None
-    evidence: list[Any] = []
-    metrics: dict[str, Any] = {}
-    limitations: list[Any] = []
+    evidence: list[Any] = Field(default_factory=list)
+    metrics: dict[str, Any] = Field(default_factory=dict)
+    limitations: list[Any] = Field(default_factory=list)
 
 
 class QCReportSchema(BaseModel):
     status: str
-    issues: list[Any] = []
-    corrections: list[str] = []
+    issues: list[Any] = Field(default_factory=list)
+    corrections: list[str] = Field(default_factory=list)
+    needs_reevaluation: list[str] = Field(default_factory=list)
 
 
 class Visualizations(BaseModel):
-    verdict_distribution: list[dict[str, Any]] = []
-    statistical_comparisons: list[dict[str, Any]] = []
-    time_series: list[dict[str, Any]] = []
+    verdict_distribution: list[dict[str, Any]] = Field(default_factory=list)
+    statistical_comparisons: list[dict[str, Any]] = Field(default_factory=list)
+    time_series: list[dict[str, Any]] = Field(default_factory=list)
 
 
 class AnalyzeResponse(BaseModel):
@@ -51,3 +51,12 @@ class AnalyzeResponse(BaseModel):
     claims: list[ClaimViz]
     visualizations: Visualizations
     quality_control: QCReportSchema
+
+
+class AnalysisListItem(BaseModel):
+    analysis_id: str
+    title: str
+    filename: str | None = None
+    status: str
+    created_at: datetime
+    summary: AnalysisSummary

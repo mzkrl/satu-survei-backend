@@ -12,6 +12,11 @@ class Settings(BaseSettings):
     ALGORITHM: str
     ACCESS_TOKEN_EXPIRE_MINUTES: int
 
+    # Browser origins allowed to call the API (comma separated).
+    CORS_ORIGINS: str = (
+        "https://satu-survey.vercel.app/"
+    )
+
     # MinIO Object Storage
     MINIO_ENDPOINT: str = "localhost:9000"
     MINIO_ACCESS_KEY: str = "minioadmin"

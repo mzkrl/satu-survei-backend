@@ -18,6 +18,5 @@ class UserResponse(BaseModel):
     id: UUID
     username: str
     email: str | None = None
-    password: str
 
     model_config = ConfigDict(from_attributes=True)
