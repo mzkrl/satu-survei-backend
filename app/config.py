@@ -50,6 +50,9 @@ class Settings(BaseSettings):
     # Public share links. Leave empty to let the frontend build the URL.
     SHARE_BASE_URL: str = ""
 
+    # Expose an authenticated OpenAI-compatible passthrough at /llm/*.
+    LLM_PROXY_ENABLED: bool = True
+
     # Upload
     MAX_UPLOAD_SIZE_MB: int = 20
 

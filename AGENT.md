@@ -70,6 +70,7 @@ Dokumen ini merangkum perubahan yang diimplementasikan pada codebase selama sesi
 - **`app/config.py`**: `ANALYSIS_QUEUE_ENABLED`, `ANALYSIS_WORKER_POLL_SECONDS`, `ANALYSIS_JOB_MAX_ATTEMPTS`, `SHARE_BASE_URL`.
 - **`migrations_queue_dedupe_share.sql`** *(baru)* + **`db_satusurvey.sql`**: kolom/tabel/index/constraint untuk queue, hash, share, dan status `queued` (idempotent untuk DB existing).
 - **`tests/test_queue_and_hash.py`** *(baru)*: stabilitas SHA-256 dan pembentukan share URL.
+- **`app/routes/llm_proxy.py`** *(baru)*: passthrough OpenAI-compatible terautentikasi ke 9router privat. Hanya path `models`, `chat/completions`, `completions`, dan `embeddings` yang diteruskan; API key disuntik di server, header client yang sensitif dibuang, dan respons di-stream. Digerbangi `LLM_PROXY_ENABLED` serta `get_current_user` sehingga tidak menjadi relay publik.
 - **Frontend** (ringkas): `lib/api.ts` + `lib/hooks.ts` polling status, halaman `/share/[token]` publik, panel share/copy link, badge status `queued`, dan notifikasi hasil dedupe.
 
 ## 9. Catatan Operasional

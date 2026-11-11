@@ -102,6 +102,10 @@ Jangan commit file `.env`.
 - Untuk DB existing, jalankan `migrations_queue_dedupe_share.sql` sekali sebelum restart. Untuk instalasi baru, `db_satusurvey.sql` sudah memuat kolom/tabel terbaru.
 - Worker bisa dimatikan sementara dengan `ANALYSIS_QUEUE_ENABLED=false`; atur interval polling lewat `ANALYSIS_WORKER_POLL_SECONDS`.
 
+### Proxy LLM (9router privat)
+
+9router berjalan di localhost (`QWEN_BASE_URL=http://127.0.0.1:20128/v1`) dan tidak perlu dibuka ke internet. Backend meneruskan permintaan OpenAI-compatible yang sudah terautentikasi ke 9router lewat `GET|POST /llm/{path}` (`models`, `chat/completions`, `completions`, `embeddings`). API key 9router hanya dipakai di server dan tidak pernah dikirim ke client. Matikan dengan `LLM_PROXY_ENABLED=false`. Endpoint ini memakai akun aplikasi yang sama (Bearer token), jadi tidak terbuka untuk publik tanpa login.
+
 ## 2. Siapkan PostgreSQL
 
 Jalankan service PostgreSQL:
