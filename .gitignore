@@ -3,3 +3,9 @@ app/__pycache__
 venv
 storage/minio/.minio.sys
 storage/minio/satusurvey
+app/agents/__pycache__
+app/models/__pycache__
+app/routes/__pycache__
+app/schemas/__pycache__
+app/services/__pycache__
+app/utils/__pycache__
