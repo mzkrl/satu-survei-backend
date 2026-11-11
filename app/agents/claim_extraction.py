@@ -1,8 +1,6 @@
 from __future__ import annotations
 
-import json
 import re
-from typing import Any
 
 from pydantic import BaseModel, Field
 
@@ -69,15 +67,12 @@ def _heuristic_extract(full_text: str) -> ClaimExtractionResult:
 
 def _llm_extract(full_text: str) -> ClaimExtractionResult | None:
     try:
-        from openai import OpenAI
         from app.config import settings
+        from app.services.llm_client import chat_json
     except Exception:
-        return None
-    if not getattr(settings, "QWEN_API_KEY", ""):
         return None
     if not getattr(settings, "LLM_CLAIM_EXTRACTION", True):
         return None
-    client = OpenAI(api_key=settings.QWEN_API_KEY, base_url=settings.QWEN_BASE_URL)
     max_chars = int(getattr(settings, "LLM_CLAIM_TEXT_MAX_CHARS", 8000) or 8000)
     text = (full_text or "")[:max_chars]
     prompt = (
@@ -88,15 +83,11 @@ def _llm_extract(full_text: str) -> ClaimExtractionResult | None:
         "If none, return {\"claims\": [], \"no_evaluable_claims\": true}.\n\nTEXT:\n"
         + text
     )
+    result = chat_json(prompt)
+    if result is None:
+        return None
+    data, _model = result
     try:
-        resp = client.chat.completions.create(
-            model=settings.QWEN_MODEL,
-            messages=[{"role": "user", "content": prompt}],
-            temperature=0,
-        )
-        content = resp.choices[0].message.content or "{}"
-        m = re.search(r"\{.*\}", content, re.DOTALL)
-        data = json.loads(m.group(0) if m else content)
         claims = [ExtractedClaim(**c) for c in data.get("claims", [])]
         return ClaimExtractionResult(
             claims=claims,

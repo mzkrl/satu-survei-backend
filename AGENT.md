@@ -20,7 +20,7 @@ Dokumen ini merangkum perubahan yang diimplementasikan pada codebase selama sesi
 
 ## 3. Konfigurasi & Aplikasi
 
-- **`app/config.py`**: penambahan konfigurasi MinIO (`MINIO_ENDPOINT/ACCESS_KEY/SECRET_KEY/BUCKET/SECURE`), Qwen/OpenAI-compatible LLM (`QWEN_API_KEY/BASE_URL/MODEL`), batas upload (`MAX_UPLOAD_SIZE_MB`), dan kontrol biaya token (`LLM_CLAIM_EXTRACTION`, `LLM_EVALUATION`, `LLM_CLAIM_TEXT_MAX_CHARS`, `LLM_MAX_EVIDENCE_PER_CLAIM`, `LLM_EVIDENCE_EXCERPT_MAX_CHARS`), dengan `extra="ignore"`.
+- **`app/config.py`**: penambahan konfigurasi MinIO (`MINIO_ENDPOINT/ACCESS_KEY/SECRET_KEY/BUCKET/SECURE`), Qwen/OpenAI-compatible LLM (`QWEN_API_KEY/BASE_URL/MODEL`), fallback model (`LLM_FALLBACK_MODELS`) + timeout/retry (`LLM_TIMEOUT_SECONDS`, `LLM_MAX_RETRIES`), batas upload (`MAX_UPLOAD_SIZE_MB`), dan kontrol biaya token (`LLM_CLAIM_EXTRACTION`, `LLM_EVALUATION`, `LLM_CLAIM_TEXT_MAX_CHARS`, `LLM_MAX_EVIDENCE_PER_CLAIM`, `LLM_EVIDENCE_EXCERPT_MAX_CHARS`), dengan `extra="ignore"`.
 - **`app/main.py`**: registrasi router `analyze`, serta `lifespan` startup yang menjalankan `Base.metadata.create_all(bind=engine)` (dengan import model) untuk membuat tabel yang belum ada.
 - **`.env.example`** & **`requirements.txt`**: diperbarui (variabel MinIO/Qwen/upload; dependensi seperti `minio`, `openai`, `pypdf`, `pdf2image`, `pillow`, `pytesseract`, dll.).
 
@@ -52,6 +52,26 @@ Dokumen ini merangkum perubahan yang diimplementasikan pada codebase selama sesi
 - **`tests/test_visualization.py`**: konsistensi ringkasan/distribusi/output visualisasi.
 - **`tests/test_evidence_pipeline.py`** *(baru)*: normalisasi pemisah desimal, ekstraksi & pencocokan evidence untuk klaim numerik dan perbandingan historis.
 
-## 7. Catatan Operasional
+## 7. Integrasi 9router & Fallback LLM
+
+- **`app/services/llm_client.py`** *(baru)*: client OpenAI-compatible terpusat. `chat_json()` mencoba `QWEN_MODEL` lebih dulu, lalu `LLM_FALLBACK_MODELS` secara berurutan bila terjadi error, kuota habis, atau output bukan JSON valid; mengembalikan `(data, model_used)` atau `None`. Selalu mengirim `stream=false` (beberapa provider 9router mengembalikan SSE bila field ini kosong), memakai `LLM_TIMEOUT_SECONDS`/`LLM_MAX_RETRIES`, dan mencatat model fallback yang dipakai ke log.
+- **`app/agents/claim_extraction.py` & `app/agents/analysis.py`**: tidak lagi membuat client OpenAI sendiri; keduanya memakai `chat_json()` sehingga otomatis mendapat fallback model, lalu tetap jatuh ke heuristik bila semua model gagal.
+- **`.env.example`**: contoh konfigurasi 9router (`QWEN_BASE_URL=http://YOUR_9ROUTER_HOST:20128/v1`, `QWEN_MODEL=alims-intl/qwen-flash`) beserta rantai fallback gratis dan variabel kontrol token.
+
+## 8. Queue PostgreSQL, Dedupe PDF, dan Share Hasil
+
+- **`app/models/analysis_jobs.py`** *(baru)*: entitas `analysis_jobs` (`analysis_id` unik, `document_id`, `user_id`, `file_hash`, status `queued|running|completed|failed`, `attempts`, `last_error`, `run_after`, `locked_until`, timestamp). Index unik parsial `(user_id, file_hash) WHERE status IN ('queued','running')` mencegah dua job aktif untuk PDF yang sama.
+- **`app/models/analyses.py` & `app/models/documents.py`**: tambah `share_token`/`shared_at` pada analyses dan `file_hash` pada documents.
+- **`app/services/analysis_queue.py`** *(baru)*: worker thread PostgreSQL-backed tanpa Redis. Klaim job dengan `SELECT ... FOR UPDATE SKIP LOCKED`, proses pipeline memakai session sendiri, tandai completed/failed, dan pulihkan job `running` yang tertinggal saat startup (bersihkan claims/evidence parsial lalu requeue).
+- **`app/services/file_hash.py`** *(baru)*: SHA-256 isi PDF untuk dedupe.
+- **`app/services/analyze_pipeline.py`**: tetap dipakai worker tanpa perubahan alur; ekstraksi dokumen, klaim, evidence, evaluasi, QC, dan visualisasi berjalan di background.
+- **`app/routes/analyze.py`**: `POST /analyze` memvalidasi, menghitung hash, mengecek job aktif/hasil completed milik user yang sama, menyimpan PDF ke MinIO, membuat `Analyses`+`Documents`+`AnalysisJob` dalam satu transaksi, lalu `wake_worker()` dan mengembalikan `202`. Endpoint baru: `GET /analyses/{id}/status`, `POST/DELETE /analyses/{id}/share`, dan `GET /public/analyses/{token}` (tanpa auth). `GET /analyses/{id}` mengembalikan `202` + status selama belum selesai dan hasil lengkap hanya saat `completed`.
+- **`app/main.py`**: lifespan menjalankan `start_worker()` setelah `create_all` dan `stop_worker()` saat shutdown.
+- **`app/config.py`**: `ANALYSIS_QUEUE_ENABLED`, `ANALYSIS_WORKER_POLL_SECONDS`, `ANALYSIS_JOB_MAX_ATTEMPTS`, `SHARE_BASE_URL`.
+- **`migrations_queue_dedupe_share.sql`** *(baru)* + **`db_satusurvey.sql`**: kolom/tabel/index/constraint untuk queue, hash, share, dan status `queued` (idempotent untuk DB existing).
+- **`tests/test_queue_and_hash.py`** *(baru)*: stabilitas SHA-256 dan pembentukan share URL.
+- **Frontend** (ringkas): `lib/api.ts` + `lib/hooks.ts` polling status, halaman `/share/[token]` publik, panel share/copy link, badge status `queued`, dan notifikasi hasil dedupe.
+
+## 9. Catatan Operasional
 
 - Jalankan `migrations_analyze.sql` pada DB existing bila diperlukan; pastikan MinIO & (opsional) Tesseract/Poppler untuk OCR tersedia. Konfigurasi LLM dan batas token melalui `.env`. Restart server setelah perubahan. Verifikasi kompilasi: `python -m compileall app tests`; pengujian: `PYTHONPATH=. pytest -q` (bila `pytest` terpasang).

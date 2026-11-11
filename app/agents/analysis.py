@@ -179,14 +179,11 @@ def _slim_evidence_for_llm(evidence: list[dict]) -> list[dict]:
 
 def _llm_evaluate(claim: dict, evidence: list[dict]) -> ClaimEvaluation | None:
     try:
-        from openai import OpenAI
+        from app.services.llm_client import chat_json
     except Exception:
-        return None
-    if not getattr(settings, "QWEN_API_KEY", ""):
         return None
     if not getattr(settings, "LLM_EVALUATION", True):
         return None
-    client = OpenAI(api_key=settings.QWEN_API_KEY, base_url=settings.QWEN_BASE_URL)
     compact_claim = {
         "id": claim.get("id"),
         "statement": claim.get("statement"),
@@ -203,15 +200,11 @@ def _llm_evaluate(claim: dict, evidence: list[dict]) -> ClaimEvaluation | None:
         "State assessment is against report's own evidence, not independent verification.\n\n"
         f"CLAIM: {json.dumps(compact_claim, ensure_ascii=False)}\nEVIDENCE: {json.dumps(slim_ev, ensure_ascii=False)}"
     )
+    result = chat_json(prompt)
+    if result is None:
+        return None
+    data, _model = result
     try:
-        resp = client.chat.completions.create(
-            model=settings.QWEN_MODEL,
-            messages=[{"role": "user", "content": prompt}],
-            temperature=0,
-        )
-        content = resp.choices[0].message.content or "{}"
-        m = re.search(r"\{.*\}", content, re.DOTALL)
-        data = json.loads(m.group(0) if m else content)
         data["claim_id"] = str(claim.get("id"))
         data.setdefault("evidence_ids", [])
         data.setdefault("metrics", {})

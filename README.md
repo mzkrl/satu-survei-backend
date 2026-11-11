@@ -88,9 +88,19 @@ python -c "import secrets; print(secrets.token_hex(32))"
 
 - `MINIO_ACCESS_KEY` dan `MINIO_SECRET_KEY`. Nilai ini juga dipakai oleh `docker-compose.yml`, jadi harus sama.
 - `QWEN_API_KEY`, `QWEN_BASE_URL`, dan `QWEN_MODEL` bila memakai LLM. Bagian ini boleh dikosongkan; pipeline memiliki fallback heuristik.
+- `LLM_FALLBACK_MODELS` berisi model cadangan (pisahkan dengan koma) yang dicoba berurutan saat model utama error atau kuotanya habis. Contoh untuk 9router: `oc/deepseek-v4.1-flash-free,bzl/auto:free,kgw/kilo-auto/free,all`.
+- `LLM_TIMEOUT_SECONDS` dan `LLM_MAX_RETRIES` mengatur batas waktu dan retry per model. Client selalu mengirim `stream=false` karena beberapa provider 9router mengembalikan SSE saat field tersebut kosong.
 - `MAX_UPLOAD_SIZE_MB` sesuai batas ukuran PDF yang diinginkan.
 
 Jangan commit file `.env`.
+
+### Queue, dedupe, dan share
+
+- Analisis PDF sekarang masuk antrean PostgreSQL (`analysis_jobs`) dan diproses worker di dalam proses FastAPI, tanpa Redis. `POST /analyze` langsung mengembalikan `202` berisi `analysis_id`, `job_id`, `status`, dan `deduplicated`; frontend memantau `GET /analyses/{id}/status` lalu mengambil hasil saat `completed`.
+- PDF di-hash SHA-256. Upload ulang PDF yang sama oleh user yang sama akan mengembalikan hasil yang sudah ada (`deduplicated=true`). Kirim field multipart `force=true` bila ingin menganalisis ulang.
+- Share hasil: `POST /analyses/{id}/share` menghasilkan token publik; hasil bisa dibaca tanpa login di `GET /public/analyses/{token}`. `DELETE /analyses/{id}/share` mencabut link.
+- Untuk DB existing, jalankan `migrations_queue_dedupe_share.sql` sekali sebelum restart. Untuk instalasi baru, `db_satusurvey.sql` sudah memuat kolom/tabel terbaru.
+- Worker bisa dimatikan sementara dengan `ANALYSIS_QUEUE_ENABLED=false`; atur interval polling lewat `ANALYSIS_WORKER_POLL_SECONDS`.
 
 ## 2. Siapkan PostgreSQL
 

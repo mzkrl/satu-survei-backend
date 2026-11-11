@@ -7,12 +7,17 @@ from app.config import settings
 from app.database import Base, engine
 import app.models  # noqa: F401
 from app.routes import users, auth, analyze
+from app.services.analysis_queue import start_worker, stop_worker
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     Base.metadata.create_all(bind=engine)
-    yield
+    start_worker()
+    try:
+        yield
+    finally:
+        stop_worker()
 
 
 app = FastAPI(

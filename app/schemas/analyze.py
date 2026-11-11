@@ -60,3 +60,23 @@ class AnalysisListItem(BaseModel):
     status: str
     created_at: datetime
     summary: AnalysisSummary
+
+
+class AnalyzeQueuedResponse(BaseModel):
+    analysis_id: str
+    job_id: str | None = None
+    status: str
+    deduplicated: bool = False
+
+
+class AnalysisStatusResponse(BaseModel):
+    analysis_id: str
+    status: str
+    error: str | None = None
+
+
+class ShareLinkResponse(BaseModel):
+    analysis_id: str
+    share_token: str
+    share_url: str | None = None
+    shared_at: datetime | None = None
