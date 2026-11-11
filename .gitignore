@@ -11,3 +11,9 @@ app/services/__pycache__
 app/utils/__pycache__ 
 .venv
 venvsource
+
+# Python build/runtime artifacts
+__pycache__/
+*.py[cod]
+*.log
+.pytest_cache/
