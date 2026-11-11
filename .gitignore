@@ -1,8 +1,5 @@
-.venv/
-__pycache__/
-*.py[cod]
 .env
-db.sqlite3
-staticfiles/
-media/
-.pytest_cache/
+app/__pycache__
+venv
+storage/minio/.minio.sys
+storage/minio/satusurvey
